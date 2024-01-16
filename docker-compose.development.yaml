@@ -1,0 +1,34 @@
+services:
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: game-live
+      POSTGRES_USER: game-live
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  keycloak-postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-postgres
+      DB_DATABASE: keycloak
+      DB_USER: user
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    depends_on:
+      - keycloak-postgres
+    command: start-dev
