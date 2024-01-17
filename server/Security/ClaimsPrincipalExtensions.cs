@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using GameLiveServer.Data;
+using GameLiveServer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameLiveServer.Security;
 
@@ -10,14 +12,12 @@ public static class ClaimsPrincipalExtensions
         if (user.Identity?.IsAuthenticated != true)
             throw new InvalidOperationException("User not authenticated");
 
-        await Task.CompletedTask;
+        var externalId = user.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
-        return new AppUser
-        {
-            Id = user.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value,
-            Username = user.Claims.First(c => c.Type == "preferred_username").Value,
-            Email = user.Claims.First(c => c.Type == ClaimTypes.Email).Value,
-            EmailVerified = user.Claims.First(c => c.Type == "email_verified").Value == "true"
-        };
+        var appUser = await dbContext.AppUsers.SingleOrDefaultAsync(u => u.ExternalId == externalId);
+        if (appUser == null)
+            throw new Exception("AppUser not found in database");
+
+        return appUser;
     }
 }

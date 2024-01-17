@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameLiveServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240117073140_AddAppUser")]
+    [Migration("20240117123757_AddAppUser")]
     partial class AddAppUser
     {
         /// <inheritdoc />
@@ -35,12 +35,20 @@ namespace GameLiveServer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

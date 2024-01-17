@@ -49,6 +49,12 @@ public class AuthController(AppDbContext dbContext) : ControllerBase
     [HttpGet("Profile")]
     public async Task<IActionResult> Profile()
     {
-        return Ok(await User.GetAppUserAsync(dbContext));
+        var appUser = await User.GetAppUserAsync(dbContext);
+        return Ok(new
+        {
+            appUser.Id,
+            appUser.Username,
+            appUser.Email
+        });
     }
 }
