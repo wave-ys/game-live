@@ -10,6 +10,7 @@ import {Button} from "@/components/ui/button";
 import UserAvatar from "@/components/user-avatar";
 import DropdownMenuLogoutItem from "@/app/(home)/_components/navbar/dropdown-menu-logout-item";
 import DropdownMenuLoginItem from "@/app/(home)/_components/navbar/dropdown-menu-login-item";
+import DropdownMenuThemeItem from "@/app/(home)/_components/navbar/dropdown-menu-theme-item";
 
 interface UserButtonProps {
   userProfile: UserProfileModel | null;
@@ -35,6 +36,7 @@ export default function UserButton({userProfile}: UserButtonProps) {
             </>
           )
         }
+        <DropdownMenuThemeItem/>
         <DropdownMenuSeparator/>
         {userProfile ? <DropdownMenuLogoutItem/> : <DropdownMenuLoginItem/>}
       </DropdownMenuContent>

@@ -6,7 +6,7 @@ export default function DropdownMenuLoginItem() {
   return (
     <a href={LOGIN_API_URL}>
       <DropdownMenuItem>
-        <TbLogin2 className={"h-4 w-4 mr-2"}/>
+        <TbLogin2 className={"h-4 w-4 me-2"}/>
         Log In
       </DropdownMenuItem>
     </a>

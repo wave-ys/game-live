@@ -6,7 +6,7 @@ export default function DropdownMenuLogoutItem() {
   return (
     <a href={LOGOUT_API_URL}>
       <DropdownMenuItem>
-        <TbLogout2 className={"h-4 w-4 mr-2"}/>
+        <TbLogout2 className={"h-4 w-4 me-2"}/>
         Log Out
       </DropdownMenuItem>
     </a>
