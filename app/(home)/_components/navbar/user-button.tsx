@@ -28,7 +28,7 @@ export default function UserButton({userProfile}: UserButtonProps) {
         {
           userProfile && (
             <>
-              <DropdownMenuLabel className="font-normal">
+              <DropdownMenuLabel className="select-none text-center font-semibold">
                 {userProfile.username}
               </DropdownMenuLabel>
               <DropdownMenuSeparator/>
