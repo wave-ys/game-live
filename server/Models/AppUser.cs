@@ -8,6 +8,9 @@ public class AppUser
     public string Username { get; set; } = default!;
     public string Email { get; set; } = default!;
 
+    public string AvatarPath { get; set; } = default!;
+    public string AvatarContentType { get; set; } = default!;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

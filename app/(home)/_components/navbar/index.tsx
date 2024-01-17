@@ -14,7 +14,7 @@ export default function HomeNavbar({userProfile}: HomeNavbarProps) {
         <WebsiteIcon className={"ms-2"}/>
       </div>
       <div className={"flex-grow w-full flex-shrink"}></div>
-      <div className={"flex-grow w-full flex-shrink-[2] flex justify-end space-x-2 items-center"}>
+      <div className={"flex-grow w-full flex-shrink-[2] flex justify-end space-x-4 items-center"}>
         {!userProfile && <LoginButton/>}
         <UserButton userProfile={userProfile}/>
       </div>

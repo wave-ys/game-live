@@ -1,5 +1,6 @@
 using GameLiveServer.Data;
 using GameLiveServer.Security;
+using GameLiveServer.Storage;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+
+builder.Services.AddAppObjectStorage(builder.Configuration);
 
 var app = builder.Build();
 

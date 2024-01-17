@@ -1,4 +1,4 @@
-import {UserProfileModel} from "@/api";
+import {getAvatarApiUrl, UserProfileModel} from "@/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,8 @@ export default function UserButton({userProfile}: UserButtonProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <UserAvatar src={"/avatars/01.png"} alt={userProfile?.username ?? "user"}/>
+          <UserAvatar src={userProfile ? getAvatarApiUrl(userProfile.id) : undefined}
+                      alt={userProfile?.username ?? "user"}/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
