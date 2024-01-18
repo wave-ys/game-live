@@ -7,6 +7,8 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AppUser> AppUsers { get; set; } = default!;
 
+    public DbSet<LiveStream> LiveStreams { get; set; } = default!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AppUser>().Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");

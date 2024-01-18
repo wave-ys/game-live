@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using System.Security.Claims;
+using GameLiveServer.Configuration;
 using GameLiveServer.Data;
 using GameLiveServer.Models;
 using GameLiveServer.Storage;
@@ -16,6 +17,10 @@ public static class ServiceCollectionExtensions
     public static AuthenticationBuilder AddAppAuthentication(this IServiceCollection services,
         IConfiguration configuration, bool isDevelopment)
     {
+        var settings = configuration.GetRequiredSection("OIDC").Get<AppSecurityConfiguration>();
+        if (settings == null)
+            throw new InvalidOperationException("Cannot read OIDC configuration");
+
         return services
             .AddAuthentication(
                 options =>
@@ -30,10 +35,8 @@ public static class ServiceCollectionExtensions
                 _ => { })
             .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
-                options.ClientId = configuration.GetValue<string>("OIDC:ClientId") ??
-                                   throw new InvalidOperationException("OIDC Client not found");
-                options.ClientSecret = configuration.GetValue<string>("OIDC:ClientSecret") ??
-                                       throw new InvalidOperationException("OIDC Secret not found");
+                options.ClientId = settings.ClientId;
+                options.ClientSecret = settings.ClientSecret;
 
                 options.ResponseType = "code";
                 options.SaveTokens = true;
@@ -41,8 +44,7 @@ public static class ServiceCollectionExtensions
                 options.CallbackPath = "/Api/Auth/SignIn-Callback";
                 options.SignedOutCallbackPath = "/Api/Auth/SignOut-Callback";
 
-                options.MetadataAddress = configuration.GetValue<string>("OIDC:MetadataAddress") ??
-                                          throw new InvalidOperationException("OIDC metadata address not found");
+                options.MetadataAddress = settings.MetadataAddress;
                 if (isDevelopment)
                     options.RequireHttpsMetadata = false;
 

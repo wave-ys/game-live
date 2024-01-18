@@ -96,7 +96,7 @@ namespace GameLiveServer.Migrations
                     b.HasIndex("StreamKey")
                         .IsUnique();
 
-                    b.ToTable("LiveStream");
+                    b.ToTable("LiveStreams");
                 });
 
             modelBuilder.Entity("GameLiveServer.Models.LiveStream", b =>

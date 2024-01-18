@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameLiveServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240118145005_AddStream")]
-    partial class AddStream
+    [Migration("20240118152829_AddLiveStream")]
+    partial class AddLiveStream
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,7 +99,7 @@ namespace GameLiveServer.Migrations
                     b.HasIndex("StreamKey")
                         .IsUnique();
 
-                    b.ToTable("LiveStream");
+                    b.ToTable("LiveStreams");
                 });
 
             modelBuilder.Entity("GameLiveServer.Models.LiveStream", b =>

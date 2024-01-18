@@ -11,3 +11,9 @@ export interface UserProfileModel {
   username: string;
   email: string;
 }
+
+export interface StreamModel {
+  id: string;
+  serverUrl: string;
+  streamKey: string;
+}

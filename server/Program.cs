@@ -1,3 +1,4 @@
+using GameLiveServer.Configuration;
 using GameLiveServer.Data;
 using GameLiveServer.Security;
 using GameLiveServer.Storage;
@@ -23,6 +24,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
 builder.Services.AddAppObjectStorage(builder.Configuration);
+
+builder.Services.AddSingleton(
+    builder.Configuration.GetRequiredSection("StreamServer").Get<AppStreamServerConfiguration>() ??
+    throw new InvalidOperationException("Cannot read StreamServer configuration")
+);
 
 var app = builder.Build();
 
