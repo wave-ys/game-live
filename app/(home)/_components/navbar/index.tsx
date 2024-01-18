@@ -1,7 +1,7 @@
 import LoginButton from "@/components/login-button";
 import {UserProfileModel} from "@/api";
 import UserButton from "@/components/user-button";
-import WebsiteIcon from "@/app/(home)/_components/navbar/icon";
+import WebsiteIcon from "@/components/icon";
 
 interface HomeNavbarProps {
   userProfile: UserProfileModel | null

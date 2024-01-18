@@ -22,7 +22,7 @@ export default async function CreatorLayout({children, params}: CreatorLayoutPro
     <ThemeProvider storageKey={"creator"} attribute="class" defaultTheme="dark">
       <CreatorNavbar userProfile={self}/>
       <main className={"pt-14"}>
-        <CreatorSidebar className={"fixed"}/>
+        <CreatorSidebar userProfile={self} className={"fixed"}/>
         <CreatorMainWrapper>
           {children}
         </CreatorMainWrapper>
