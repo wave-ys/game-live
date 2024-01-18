@@ -7,5 +7,5 @@ interface CreatorPageProps {
 }
 
 export default function CreatorPage({params}: CreatorPageProps) {
-  redirect(`/u/${params.username}/u/stream`);
+  redirect(`/u/${params.username}/stream`);
 }
