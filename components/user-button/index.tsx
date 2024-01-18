@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import UserAvatar from "@/components/user-avatar";
-import DropdownMenuLogoutItem from "@/app/(home)/_components/navbar/dropdown-menu-logout-item";
-import DropdownMenuLoginItem from "@/app/(home)/_components/navbar/dropdown-menu-login-item";
-import DropdownMenuThemeItem from "@/app/(home)/_components/navbar/dropdown-menu-theme-item";
+import DropdownMenuLogoutItem from "@/components/user-button/dropdown-menu-logout-item";
+import DropdownMenuLoginItem from "@/components/user-button/dropdown-menu-login-item";
+import DropdownMenuThemeItem from "@/components/user-button/dropdown-menu-theme-item";
+import DropdownMenuCreatorDashboardItem from "@/components/user-button/dropdown-menu-creator-dashboard-item";
 
 interface UserButtonProps {
   userProfile: UserProfileModel | null;
@@ -33,6 +34,7 @@ export default function UserButton({userProfile}: UserButtonProps) {
                 {userProfile.username}
               </DropdownMenuLabel>
               <DropdownMenuSeparator/>
+              <DropdownMenuCreatorDashboardItem userProfile={userProfile}/>
             </>
           )
         }

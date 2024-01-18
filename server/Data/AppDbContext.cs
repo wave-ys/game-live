@@ -11,5 +11,6 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
         modelBuilder.Entity<AppUser>().Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<AppUser>().HasIndex(u => u.ExternalId).IsUnique();
+        modelBuilder.Entity<AppUser>().HasIndex(u => u.Username).IsUnique();
     }
 }

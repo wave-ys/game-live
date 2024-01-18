@@ -11,7 +11,7 @@ export default async function HomeLayout({children}: HomeLayoutProps) {
   const self = await getUserProfileApi();
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider storageKey={"home"} attribute="class" defaultTheme="light">
       <HomeNavbar userProfile={self}/>
       <main className={"pt-14"}>
         {children}
