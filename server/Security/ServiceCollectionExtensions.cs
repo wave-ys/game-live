@@ -80,6 +80,11 @@ public static class ServiceCollectionExtensions
             Email = claims[ClaimTypes.Email].Value,
             AvatarPath = avatarPath,
             AvatarContentType = MediaTypeNames.Image.Png,
+            LiveStream = new LiveStream
+            {
+                CreatedAt = now,
+                UpdatedAt = now
+            },
             CreatedAt = now,
             UpdatedAt = now
         };

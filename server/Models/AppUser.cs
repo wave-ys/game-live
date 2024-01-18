@@ -11,6 +11,8 @@ public class AppUser
     public string AvatarPath { get; set; } = default!;
     public string AvatarContentType { get; set; } = default!;
 
+    public LiveStream LiveStream { get; set; } = default!;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
