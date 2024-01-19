@@ -3,12 +3,13 @@ using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace GameLiveServer.Controllers;
 
 [ApiController]
 [Route("/Api/[controller]")]
-public class StreamController(AppDbContext dbContext) : ControllerBase
+public class StreamController(AppDbContext dbContext, IDistributedCache cache) : ControllerBase
 {
     [HttpGet]
     [Authorize]

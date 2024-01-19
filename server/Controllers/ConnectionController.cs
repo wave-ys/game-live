@@ -1,10 +1,13 @@
+using System.Text.Json;
 using GameLiveServer.Configuration;
 using GameLiveServer.Data;
+using GameLiveServer.Models;
 using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace GameLiveServer.Controllers;
 
@@ -14,7 +17,8 @@ public class ConnectionController(
     AppDbContext dbContext,
     AppStreamServerConfiguration configuration,
     StreamProtocols protocols,
-    HttpClient httpClient
+    HttpClient httpClient,
+    IDistributedCache cache
 ) : ControllerBase
 {
     [HttpPost("Generate")]
@@ -29,6 +33,7 @@ public class ConnectionController(
                 .SetProperty(s => s.ServerUrl, rtmpProtocol.ServerUrl)
                 .SetProperty(s => s.StreamKey, Guid.NewGuid())
             );
+        await cache.RemoveAsync("Stream." + appUser.Username);
         return Ok();
     }
 
@@ -74,6 +79,13 @@ public class ConnectionController(
                 .SetProperty(s => s.Alive, on)
                 .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
             );
+
+        var username = await dbContext.AppUsers
+            .Where(u => u.LiveStream.StreamKey == streamKey)
+            .Select(u => u.Username)
+            .SingleOrDefaultAsync();
+        if (username != null)
+            await cache.RemoveAsync("Stream." + username);
         return Ok();
     }
 
@@ -93,9 +105,22 @@ public class ConnectionController(
         if (protocol == null)
             return BadRequest("Unsupported protocol");
 
-        var liveStream = await dbContext.LiveStreams
-            .Where(s => s.AppUser.Username == username)
-            .SingleOrDefaultAsync();
+        var cacheContent = await cache.GetAsync("Stream." + username);
+        var liveStream = cacheContent == null ? null : JsonSerializer.Deserialize<LiveStream>(cacheContent);
+        if (liveStream == null)
+        {
+            liveStream = await dbContext.LiveStreams
+                .Where(s => s.AppUser.Username == username)
+                .SingleOrDefaultAsync();
+            await cache.SetStringAsync(
+                "Stream." + username,
+                JsonSerializer.Serialize(liveStream),
+                new DistributedCacheEntryOptions
+                {
+                    SlidingExpiration = TimeSpan.FromHours(2)
+                });
+        }
+
         if (liveStream?.StreamKey == null || liveStream.Alive == false)
             return NotFound("Stream not found");
 

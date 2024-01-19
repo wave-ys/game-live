@@ -26,6 +26,11 @@ services:
       - "8890:8890/udp"
       - "8189:8189/udp"
 
+  cache:
+    image: redis
+    ports:
+      - "6379:6379"
+
   minio:
     image: quay.io/minio/minio
     ports:

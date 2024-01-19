@@ -23,6 +23,11 @@ builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Cache");
+    options.InstanceName = "GameLive.";
+});
 
 builder.Services.AddAppObjectStorage(builder.Configuration);
 
