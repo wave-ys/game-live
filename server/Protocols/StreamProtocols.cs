@@ -9,6 +9,7 @@ public class StreamProtocols
     public StreamProtocols(AppStreamServerConfiguration configuration)
     {
         AddProtocol(new RtmpProtocol(configuration));
+        AddProtocol(new HlsProtocol(configuration));
     }
 
     public IStreamProtocol? this[string protocol] => GetFromProtocolName(protocol);

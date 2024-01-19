@@ -7,16 +7,21 @@ import {cn} from "@/lib/utils";
 import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import './styles.css'
+import {getStreamApiUrl, UserProfileModel} from "@/api";
 
 interface StreamPlayerProps {
   className?: string;
+  userProfileModel: UserProfileModel;
 }
 
-export default function StreamPlayer({className}: StreamPlayerProps) {
+export default function StreamPlayer({className, userProfileModel}: StreamPlayerProps) {
   return (
     <div className={cn("overflow-hidden h-full", className)}>
       <MediaPlayer className={"h-full"} title="Sprite Fight"
-                   src="http://localhost:8888/live/2663d813-e932-4f9d-a17f-36b88b2b6be1/index.m3u8">
+                   src={{
+                     src: getStreamApiUrl(userProfileModel.username, "hls"),
+                     type: "application/vnd.apple.mpegurl"
+                   }}>
         <MediaProvider></MediaProvider>
         <DefaultVideoLayout icons={defaultLayoutIcons}/>
       </MediaPlayer>

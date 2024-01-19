@@ -13,7 +13,9 @@ namespace GameLiveServer.Controllers;
 public class ConnectionController(
     AppDbContext dbContext,
     AppStreamServerConfiguration configuration,
-    StreamProtocols protocols) : ControllerBase
+    StreamProtocols protocols,
+    HttpClient httpClient
+) : ControllerBase
 {
     [HttpPost("Generate")]
     [Authorize]
@@ -35,7 +37,7 @@ public class ConnectionController(
     {
         if (body.Action == "read")
             return Ok();
-        
+
         var protocol = protocols[body.Protocol];
         if (protocol == null)
             return BadRequest();
@@ -73,6 +75,36 @@ public class ConnectionController(
                 .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
             );
         return Ok();
+    }
+
+    [HttpGet("Stream/{username}")]
+    public IActionResult GetStream(string username, [FromQuery(Name = "protocol")] string protocolName)
+    {
+        var protocol = protocols[protocolName];
+        if (protocol == null)
+            return BadRequest("Unsupported protocol");
+        return Redirect(protocol.BuildFrontUrl(username).ToLower());
+    }
+
+    [HttpGet("Stream/Hls/{username}/{fileName}")]
+    public async Task<IActionResult> GetHlsStream(string username, string filename)
+    {
+        var protocol = protocols.GetFromProtocolName("hls");
+        if (protocol == null)
+            return BadRequest("Unsupported protocol");
+
+        var liveStream = await dbContext.LiveStreams
+            .Where(s => s.AppUser.Username == username)
+            .SingleOrDefaultAsync();
+        if (liveStream?.StreamKey == null || liveStream.Alive == false)
+            return NotFound("Stream not found");
+
+        Response.StatusCode = StatusCodes.Status200OK;
+        var response = await httpClient.GetAsync(
+            protocol.BuildUrl(liveStream.StreamKey.Value, filename) + QueryString.Create(Request.Query).ToUriComponent()
+        );
+        await response.Content.CopyToAsync(Response.Body);
+        return Empty;
     }
 }
 
