@@ -16,18 +16,19 @@ interface CreatorSidebarProps {
 
 export default function CreatorSidebar({className, userProfile}: CreatorSidebarProps) {
   const collapsed = useCreatorSidebar(state => state.collapsed);
+  const iconClassName = collapsed ? "h-5 w-5" : "h-4 w-4";
 
   return (
     <aside className={cn("w-64 p-2 h-full border-e bg-background", collapsed && "w-14", className)}>
       <SidebarHeader/>
-      <div className={"space-y-1"}>
-        <SidebarItem icon={<CiStreamOn className={"h-4 w-4"}/>} label={"Stream"}
+      <div className={cn("mt-2 flex flex-col items-center", !collapsed ? "space-y-1" : "space-y-2")}>
+        <SidebarItem icon={<CiStreamOn className={iconClassName}/>} label={"Stream"}
                      href={`/u/${userProfile.username}/stream`}/>
-        <SidebarItem icon={<VscKey className={"h-4 w-4"}/>} label={"Keys"}
+        <SidebarItem icon={<VscKey className={iconClassName}/>} label={"Keys"}
                      href={`/u/${userProfile.username}/keys`}/>
-        <SidebarItem icon={<IoChatboxEllipsesOutline className={"h-4 w-4"}/>} label={"Chat"}
+        <SidebarItem icon={<IoChatboxEllipsesOutline className={iconClassName}/>} label={"Chat"}
                      href={`/u/${userProfile.username}/chat`}/>
-        <SidebarItem icon={<IoPeopleOutline className={"h-4 w-4"}/>} label={"Community"}
+        <SidebarItem icon={<IoPeopleOutline className={iconClassName}/>} label={"Community"}
                      href={`/u/${userProfile.username}/community`}/>
       </div>
     </aside>
