@@ -1,5 +1,6 @@
 using GameLiveServer.Configuration;
 using GameLiveServer.Data;
+using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using GameLiveServer.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,8 @@ builder.Services.AddSingleton(
     builder.Configuration.GetRequiredSection("StreamServer").Get<AppStreamServerConfiguration>() ??
     throw new InvalidOperationException("Cannot read StreamServer configuration")
 );
+
+builder.Services.AddSingleton<StreamProtocols>();
 
 var app = builder.Build();
 

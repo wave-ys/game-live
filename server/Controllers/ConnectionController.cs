@@ -1,5 +1,6 @@
 using GameLiveServer.Configuration;
 using GameLiveServer.Data;
+using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,16 +10,21 @@ namespace GameLiveServer.Controllers;
 
 [ApiController]
 [Route("/Api/[controller]")]
-public class ConnectionController(AppDbContext dbContext, AppStreamServerConfiguration configuration) : ControllerBase
+public class ConnectionController(
+    AppDbContext dbContext,
+    AppStreamServerConfiguration configuration,
+    StreamProtocols protocols) : ControllerBase
 {
     [HttpPost("Generate")]
     [Authorize]
     public async Task<IActionResult> GenerateConnection()
     {
         var appUser = await User.GetAppUserAsync(dbContext);
+
+        var rtmpProtocol = protocols["rtmp"]!;
         await dbContext.LiveStreams.Where(s => s.AppUserId == appUser.Id)
             .ExecuteUpdateAsync(setter => setter
-                .SetProperty(s => s.ServerUrl, configuration.RtmpAddress + configuration.PathPrefix)
+                .SetProperty(s => s.ServerUrl, rtmpProtocol.ServerUrl)
                 .SetProperty(s => s.StreamKey, Guid.NewGuid())
             );
         return Ok();
@@ -27,26 +33,18 @@ public class ConnectionController(AppDbContext dbContext, AppStreamServerConfigu
     [HttpPost("Authenticate")]
     public async Task<IActionResult> AuthenticateConnection(AuthenticateConnectionDto body)
     {
-        if (body.Action == "publish")
-        {
-            if (body.Protocol == "rtmp")
-            {
-                if (!body.Path.StartsWith(configuration.PathPrefix))
-                    return Forbid();
+        var protocol = protocols[body.Protocol];
+        if (protocol == null)
+            return BadRequest();
 
-                var streamKey = body.Path[configuration.PathPrefix.Length..];
-                if (streamKey.StartsWith('/'))
-                    streamKey = streamKey[1..];
+        var streamKey = protocol.ParseStreamKeyFromPath(body.Path);
+        if (streamKey == null)
+            return BadRequest();
 
-                if (!await dbContext.LiveStreams.AnyAsync(s =>
-                        s.StreamKey.ToString() == streamKey &&
-                        s.ServerUrl == configuration.RtmpAddress + configuration.PathPrefix))
-                    return Forbid();
-                return Ok();
-            }
-
-            return Forbid();
-        }
+        if (!await dbContext.LiveStreams.AnyAsync(s =>
+                s.StreamKey == streamKey &&
+                s.ServerUrl == configuration.RtmpAddress + configuration.PathPrefix))
+            return BadRequest();
 
         return Ok();
     }
