@@ -11,7 +11,18 @@ public class StreamProtocols
         AddProtocol(new RtmpProtocol(configuration));
     }
 
-    public IStreamProtocol? this[string protocol] => _protocols.GetValueOrDefault(protocol);
+    public IStreamProtocol? this[string protocol] => GetFromProtocolName(protocol);
+
+    public IStreamProtocol? GetFromProtocolName(string protocol)
+    {
+        return _protocols.GetValueOrDefault(protocol);
+    }
+
+    public IStreamProtocol? GetFromSourceType(string sourceType)
+    {
+        var list = _protocols.Where(p => p.Value.SourceType == sourceType).ToList();
+        return list.Count == 1 ? list.First().Value : null;
+    }
 
     private void AddProtocol(IStreamProtocol protocol)
     {

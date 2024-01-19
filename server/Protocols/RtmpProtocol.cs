@@ -4,7 +4,8 @@ namespace GameLiveServer.Protocols;
 
 public class RtmpProtocol(AppStreamServerConfiguration configuration) : IStreamProtocol
 {
-    public string ProtocolName { get; init; } = "rtmp";
+    public string ProtocolName => "rtmp";
+    public string SourceType => "rtmpConn";
     public string ServerUrl { get; init; } = configuration.RtmpAddress + configuration.PathPrefix;
 
     public Guid? ParseStreamKeyFromPath(string path)

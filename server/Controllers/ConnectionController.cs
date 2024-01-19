@@ -48,6 +48,29 @@ public class ConnectionController(
 
         return Ok();
     }
+
+    [HttpPost("Alive")]
+    public async Task<IActionResult> MarkAlive(
+        [FromQuery] bool on,
+        [FromQuery] string path,
+        [FromQuery(Name = "source_type")] string sourceType
+    )
+    {
+        var protocol = protocols.GetFromSourceType(sourceType);
+        if (protocol == null)
+            return BadRequest();
+
+        var streamKey = protocol.ParseStreamKeyFromPath(path);
+        if (streamKey == null)
+            return BadRequest();
+
+        await dbContext.LiveStreams.Where(s => s.StreamKey == streamKey)
+            .ExecuteUpdateAsync(setter => setter
+                .SetProperty(s => s.Alive, on)
+                .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
+            );
+        return Ok();
+    }
 }
 
 public record AuthenticateConnectionDto(

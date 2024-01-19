@@ -10,11 +10,14 @@ services:
       - "5432:5432"
 
   stream-server:
-    image: bluenviron/mediamtx
-    environment:
-      MTX_PROTOCOLS: tcp
-      MTX_WEBRTCADDITIONALHOSTS: host.docker.internal
-      MTX_EXTERNALAUTHENTICATIONURL: "http://host.docker.internal:5101/api/connection/authenticate"
+    image: game-live/stream-server
+    build:
+      context: ./mediamtx
+      args:
+        TARGETARCH: amd64
+        VERSION: v1.4.2
+    volumes:
+      - "./mediamtx/mediamtx.development.yaml:/app/mediamtx.yml"
     ports:
       - "8554:8554"
       - "1935:1935"
