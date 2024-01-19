@@ -18,7 +18,7 @@ export default function CreatorSidebar({className, userProfile}: CreatorSidebarP
   const collapsed = useCreatorSidebar(state => state.collapsed);
 
   return (
-    <aside className={cn("w-64 p-2 h-full border-e", collapsed && "w-14", className)}>
+    <aside className={cn("w-64 p-2 h-full border-e bg-background", collapsed && "w-14", className)}>
       <SidebarHeader/>
       <div className={"space-y-1"}>
         <SidebarItem icon={<CiStreamOn className={"h-4 w-4"}/>} label={"Stream"}

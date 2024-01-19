@@ -8,7 +8,7 @@ export default function CreatorMainWrapper({children}: { children: React.ReactNo
   const collapsed = useCreatorSidebar(state => state.collapsed);
 
   return (
-    <div className={cn("p-6", !collapsed ? "ms-64" : "ms-14")}>
+    <div className={cn(!collapsed ? "ms-64" : "ms-14")}>
       {children}
     </div>
   )

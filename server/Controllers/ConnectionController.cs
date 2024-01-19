@@ -33,6 +33,9 @@ public class ConnectionController(
     [HttpPost("Authenticate")]
     public async Task<IActionResult> AuthenticateConnection(AuthenticateConnectionDto body)
     {
+        if (body.Action == "read")
+            return Ok();
+        
         var protocol = protocols[body.Protocol];
         if (protocol == null)
             return BadRequest();
@@ -74,12 +77,12 @@ public class ConnectionController(
 }
 
 public record AuthenticateConnectionDto(
-    string Ip,
-    string User,
-    string Password,
+    // string Ip,
+    // string User,
+    // string Password,
     string Path,
     string Protocol,
-    string Id,
-    string Action,
-    string Query
+    // string Id,
+    // string Query,
+    string Action
 );

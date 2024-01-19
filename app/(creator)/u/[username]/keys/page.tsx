@@ -9,7 +9,7 @@ export default async function KeysPage() {
     return <>Error: Stream not found</>;
 
   return (
-    <>
+    <div className={"p-6"}>
       <div className={"flex items-center justify-between"}>
         <h1 className={"font-semibold text-2xl"}>Keys & URLs</h1>
         <GenerateButton/>
@@ -18,6 +18,6 @@ export default async function KeysPage() {
         <UrlCard value={stream.serverUrl}/>
         <KeyCard value={stream.streamKey}/>
       </div>
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ interface HomeNavbarProps {
 
 export default function HomeNavbar({userProfile}: HomeNavbarProps) {
   return (
-    <nav className={"fixed h-14 w-full shadow border-b flex items-center px-2"}>
+    <nav className={"fixed z-50 h-14 w-full shadow border-b flex items-center px-2 bg-background"}>
       <div className={"flex-grow w-full flex-shrink-[2] justify-start"}>
         <WebsiteIcon className={"ms-2"}/>
       </div>
