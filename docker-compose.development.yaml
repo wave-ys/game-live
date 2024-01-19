@@ -31,7 +31,16 @@ services:
     ports:
       - "6379:6379"
 
-  minio:
+  message-queue:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  object-storage:
     image: quay.io/minio/minio
     ports:
       - "9000:9000"
@@ -43,18 +52,18 @@ services:
       MINIO_CONSOLE_ADDRESS: :9001
     command: server /data
 
-  keycloak-postgres:
+  oidc-provider-db:
     image: postgres
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
 
-  keycloak:
+  oidc-provider:
     image: quay.io/keycloak/keycloak
     environment:
       DB_VENDOR: POSTGRES
-      DB_ADDR: keycloak-postgres
+      DB_ADDR: oidc-provider-db
       DB_DATABASE: keycloak
       DB_USER: user
       DB_SCHEMA: public
@@ -66,5 +75,5 @@ services:
     volumes:
       - "./keycloak-realm.json:/opt/keycloak/data/import/keycloak-realm.json"
     depends_on:
-      - keycloak-postgres
+      - oidc-provider-db
     command: start-dev --import-realm
