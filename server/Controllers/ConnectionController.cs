@@ -25,7 +25,9 @@ public class ConnectionController(
     [Authorize]
     public async Task<IActionResult> GenerateConnection()
     {
-        var appUser = await User.GetAppUserAsync(dbContext);
+        var appUser = await User.GetAppUserAsync(dbContext,
+            u => u.Include(t => t.LiveStream)
+        );
 
         var rtmpProtocol = protocols["rtmp"]!;
         await dbContext.LiveStreams.Where(s => s.AppUserId == appUser.Id)
@@ -34,6 +36,7 @@ public class ConnectionController(
                 .SetProperty(s => s.StreamKey, Guid.NewGuid())
             );
         await cache.RemoveAsync("Stream." + appUser.Username);
+        await cache.RemoveAsync($"StreamKey.Exist.[{appUser.LiveStream.ServerUrl}].[{appUser.LiveStream.StreamKey}]");
         return Ok();
     }
 
@@ -50,10 +53,25 @@ public class ConnectionController(
         var streamKey = protocol.ParseStreamKeyFromPath(body.Path);
         if (streamKey == null)
             return BadRequest();
+        var serverUrl = configuration.RtmpAddress + configuration.PathPrefix;
 
-        if (!await dbContext.LiveStreams.AnyAsync(s =>
+        var existStr = await cache.GetStringAsync($"StreamKey.Exist.[{serverUrl}].[{streamKey}]");
+        var exist = existStr != null
+            ? existStr == "true"
+            : await dbContext.LiveStreams.AnyAsync(s =>
                 s.StreamKey == streamKey &&
-                s.ServerUrl == configuration.RtmpAddress + configuration.PathPrefix))
+                s.ServerUrl == serverUrl);
+
+        if (existStr == null)
+            await cache.SetStringAsync(
+                $"StreamKey.Exist.[{serverUrl}].[{streamKey}]",
+                exist ? "true" : "false",
+                new DistributedCacheEntryOptions
+                {
+                    SlidingExpiration = TimeSpan.FromHours(2)
+                });
+
+        if (!exist)
             return BadRequest();
 
         return Ok();
