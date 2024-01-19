@@ -56,4 +56,10 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapReverseProxy();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dataContext.Database.Migrate();
+}
+
 app.Run();
