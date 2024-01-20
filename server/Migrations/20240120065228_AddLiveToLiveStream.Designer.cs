@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameLiveServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240119100632_AddAliveToLiveStream")]
-    partial class AddAliveToLiveStream
+    [Migration("20240120065228_AddLiveToLiveStream")]
+    partial class AddLiveToLiveStream
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,14 +76,14 @@ namespace GameLiveServer.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<bool>("Alive")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("AppUserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Live")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ServerUrl")
                         .HasColumnType("text");

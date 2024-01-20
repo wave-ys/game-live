@@ -501,12 +501,12 @@ pathDefaults:
   #   a regular expression.
   # * MTX_SOURCE_TYPE: source type
   # * MTX_SOURCE_ID: source ID
-  runOnReady: curl -sS -X POST http://host.docker.internal:5101/api/connection/alive?on=true&path=$MTX_PATH&source_type=$MTX_SOURCE_TYPE&source_id=$MTX_SOURCE_ID
+  runOnReady: curl -sS -X POST http://host.docker.internal:5101/api/connection/live?on=true&path=$MTX_PATH&source_type=$MTX_SOURCE_TYPE&source_id=$MTX_SOURCE_ID
   # Restart the command if it exits.
   runOnReadyRestart: no
   # Command to run when the stream is not available anymore.
   # Environment variables are the same of runOnReady.
-  runOnNotReady: curl -sS -X POST http://host.docker.internal:5101/api/connection/alive?on=false&path=$MTX_PATH&source_type=$MTX_SOURCE_TYPE&source_id=$MTX_SOURCE_ID
+  runOnNotReady: curl -sS -X POST http://host.docker.internal:5101/api/connection/live?on=false&path=$MTX_PATH&source_type=$MTX_SOURCE_TYPE&source_id=$MTX_SOURCE_ID
 
   # Command to run when a client starts reading.
   # This is terminated with SIGINT when a client stops reading.

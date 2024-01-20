@@ -77,8 +77,8 @@ public class ConnectionController(
         return Ok();
     }
 
-    [HttpPost("Alive")]
-    public async Task<IActionResult> MarkAlive(
+    [HttpPost("Live")]
+    public async Task<IActionResult> MarkLive(
         [FromQuery] bool on,
         [FromQuery] string path,
         [FromQuery(Name = "source_type")] string sourceType
@@ -94,7 +94,7 @@ public class ConnectionController(
 
         await dbContext.LiveStreams.Where(s => s.StreamKey == streamKey)
             .ExecuteUpdateAsync(setter => setter
-                .SetProperty(s => s.Alive, on)
+                .SetProperty(s => s.Live, on)
                 .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
             );
 
@@ -139,7 +139,7 @@ public class ConnectionController(
                 });
         }
 
-        if (liveStream?.StreamKey == null || liveStream.Alive == false)
+        if (liveStream?.StreamKey == null || liveStream.Live == false)
             return NotFound("Stream not found");
 
         Response.StatusCode = StatusCodes.Status200OK;

@@ -4,7 +4,7 @@ public class LiveStream
 {
     public Guid Id { get; set; }
 
-    public bool Alive { get; set; }
+    public bool Live { get; set; }
 
     public string? ServerUrl { get; set; }
     public Guid? StreamKey { get; set; }

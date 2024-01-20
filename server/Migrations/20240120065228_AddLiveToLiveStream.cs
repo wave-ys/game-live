@@ -5,13 +5,13 @@
 namespace GameLiveServer.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAliveToLiveStream : Migration
+    public partial class AddLiveToLiveStream : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "Alive",
+                name: "Live",
                 table: "LiveStreams",
                 type: "boolean",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace GameLiveServer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Alive",
+                name: "Live",
                 table: "LiveStreams");
         }
     }
