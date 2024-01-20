@@ -1,7 +1,7 @@
 'use client';
 
 import React, {createContext, useContext, useEffect, useState} from "react";
-import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
+import {HubConnection, HubConnectionBuilder, HubConnectionState} from "@microsoft/signalr";
 
 interface EventHubState {
   connected: boolean;
