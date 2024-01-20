@@ -1,6 +1,5 @@
 using System.Net.Mime;
 using System.Security.Claims;
-using GameLiveServer.Configuration;
 using GameLiveServer.Data;
 using GameLiveServer.Models;
 using GameLiveServer.Storage;

@@ -1,5 +1,3 @@
-using GameLiveServer.Configuration;
-
 namespace GameLiveServer.Protocols;
 
 public class HlsProtocol(AppStreamServerConfiguration configuration) : IStreamProtocol

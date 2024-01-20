@@ -1,4 +1,4 @@
-namespace GameLiveServer.Configuration;
+namespace GameLiveServer.Security;
 
 public sealed class AppSecurityConfiguration
 {

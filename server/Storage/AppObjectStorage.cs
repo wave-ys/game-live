@@ -1,4 +1,3 @@
-using GameLiveServer.Configuration;
 using Minio;
 using Minio.DataModel.Args;
 

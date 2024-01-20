@@ -1,4 +1,3 @@
-using GameLiveServer.Configuration;
 using GameLiveServer.Data;
 using GameLiveServer.Protocols;
 using GameLiveServer.Security;

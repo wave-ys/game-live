@@ -1,4 +1,4 @@
-namespace GameLiveServer.Configuration;
+namespace GameLiveServer.Protocols;
 
 public sealed class AppStreamServerConfiguration
 {

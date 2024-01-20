@@ -1,5 +1,3 @@
-using GameLiveServer.Configuration;
-
 namespace GameLiveServer.Protocols;
 
 public class RtmpProtocol(AppStreamServerConfiguration configuration) : IStreamProtocol

@@ -1,4 +1,4 @@
-namespace GameLiveServer.Configuration;
+namespace GameLiveServer.Storage;
 
 public sealed class AppObjectStorageConfiguration
 {
