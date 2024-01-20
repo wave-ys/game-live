@@ -16,7 +16,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 builder.Services.AddControllers();
-
 builder.Services.AddHttpClient();
 
 builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
@@ -28,15 +27,21 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Cache");
     options.InstanceName = "GameLive.";
 });
-builder.Services.AddAppEventBus(builder.Configuration);
 builder.Services.AddAppObjectStorage(builder.Configuration);
 
 builder.Services.AddSingleton(
     builder.Configuration.GetRequiredSection("StreamServer").Get<AppStreamServerConfiguration>() ??
     throw new InvalidOperationException("Cannot read StreamServer configuration")
 );
-
 builder.Services.AddSingleton<StreamProtocols>();
+
+builder.Services
+    .AddSignalR()
+    .AddStackExchangeRedis(
+        builder.Configuration.GetConnectionString("Cache") ??
+        throw new InvalidOperationException("Cache connection string not found"),
+        options => { options.Configuration.ChannelPrefix = "GameLive.SignalR."; }
+    );
 
 var app = builder.Build();
 
@@ -55,6 +60,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapReverseProxy();
+app.MapHub<EventHub>("/Api/Event");
 
 using (var scope = app.Services.CreateScope())
 {

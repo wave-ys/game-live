@@ -6,6 +6,7 @@ using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -19,8 +20,8 @@ public class ConnectionController(
     StreamProtocols protocols,
     HttpClient httpClient,
     IDistributedCache cache,
-    IAppEventBus eventBus
-) : ControllerBase
+    IHubContext<EventHub> hubContext)
+    : ControllerBase
 {
     [HttpPost("Generate")]
     [Authorize]
@@ -106,7 +107,13 @@ public class ConnectionController(
             );
 
         await cache.RemoveAsync("Stream." + appUser.Username);
-        eventBus.Publish(new LiveStatusEventMessage(appUser.Id, on));
+        await hubContext.Clients
+            .Groups("LiveStatus." + appUser.Id)
+            .SendAsync("liveStatus", new LiveStatusEventMessage
+            {
+                UserId = appUser.Id,
+                Live = on
+            });
         return Ok();
     }
 
