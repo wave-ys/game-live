@@ -9,9 +9,9 @@ import '@vidstack/react/player/styles/default/layouts/video.css';
 import './styles.css'
 import {getStreamApiUrl, UserProfileModel} from "@/api";
 import {useEffect, useState} from "react";
-import {HubConnectionBuilder, LogLevel} from "@microsoft/signalr";
 import StreamOffline from "@/components/stream-player/offline";
 import StreamLoading from "@/components/stream-player/loading";
+import {useEventHub} from "@/components/event-hub";
 
 interface StreamPlayerProps {
   className?: string;
@@ -22,32 +22,17 @@ type LiveStatus = 'loading' | 'on' | 'off';
 
 export default function StreamPlayer({className, userProfileModel}: StreamPlayerProps) {
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
+  const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
 
   useEffect(() => {
-    const connection = new HubConnectionBuilder()
-      .withUrl("/api/event")
-      .withAutomaticReconnect()
-      .configureLogging(process.env.NODE_ENV === 'development' ? LogLevel.Information : LogLevel.None)
-      .build();
-
-    async function subscribeLiveStatus() {
-      connection.on('liveStatus', ({live}: { live: boolean }) => {
-        setLiveStatus(live ? 'on' : 'off');
-      });
-      try {
-        await connection.start();
-      } catch (e) {
-        return;
-      }
-      await connection.invoke('subscribeLiveStatus', userProfileModel.id);
-    }
-
-    subscribeLiveStatus().then();
-
+    if (!connected)
+      return;
+    const subscriber = (userId: string, live: boolean) => setLiveStatus(live ? 'on' : 'off');
+    subscribeLiveStatus(userProfileModel.id, subscriber).then();
     return () => {
-      connection.stop().then();
+      unsubscribeLiveStatus(userProfileModel.id, subscriber).then()
     }
-  }, [userProfileModel.id]);
+  }, [connected, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
 
   return (
     <div className={cn("overflow-hidden h-full", className)}>

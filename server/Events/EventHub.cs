@@ -18,6 +18,11 @@ public class EventHub : Hub
             Live = liveStream.Live
         });
     }
+
+    public async Task UnsubscribeLiveStatus(Guid userId)
+    {
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "LiveStatus." + userId);
+    }
 }
 
 public class LiveStatusEventMessage
