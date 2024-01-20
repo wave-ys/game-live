@@ -35,7 +35,6 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
     const connection = new HubConnectionBuilder()
       .withUrl("/api/event")
       .withAutomaticReconnect()
-      .configureLogging(process.env.NODE_ENV === 'development' ? LogLevel.Information : LogLevel.None)
       .build();
 
     connection.on('liveStatus', ({userId, live}: LiveStatusEventMessage) => {
