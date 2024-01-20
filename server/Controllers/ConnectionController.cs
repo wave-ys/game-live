@@ -1,5 +1,6 @@
 using System.Text.Json;
 using GameLiveServer.Data;
+using GameLiveServer.Events;
 using GameLiveServer.Models;
 using GameLiveServer.Protocols;
 using GameLiveServer.Security;
@@ -17,7 +18,8 @@ public class ConnectionController(
     AppStreamServerConfiguration configuration,
     StreamProtocols protocols,
     HttpClient httpClient,
-    IDistributedCache cache
+    IDistributedCache cache,
+    IAppEventBus eventBus
 ) : ControllerBase
 {
     [HttpPost("Generate")]
@@ -85,11 +87,17 @@ public class ConnectionController(
     {
         var protocol = protocols.GetFromSourceType(sourceType);
         if (protocol == null)
-            return BadRequest();
+            return BadRequest("Unsupported source type");
 
         var streamKey = protocol.ParseStreamKeyFromPath(path);
         if (streamKey == null)
-            return BadRequest();
+            return BadRequest("Cannot parse stream key");
+
+        var appUser = await dbContext.AppUsers
+            .Where(u => u.LiveStream.StreamKey == streamKey)
+            .SingleOrDefaultAsync();
+        if (appUser == null)
+            return BadRequest("AppUser not found");
 
         await dbContext.LiveStreams.Where(s => s.StreamKey == streamKey)
             .ExecuteUpdateAsync(setter => setter
@@ -97,12 +105,8 @@ public class ConnectionController(
                 .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
             );
 
-        var username = await dbContext.AppUsers
-            .Where(u => u.LiveStream.StreamKey == streamKey)
-            .Select(u => u.Username)
-            .SingleOrDefaultAsync();
-        if (username != null)
-            await cache.RemoveAsync("Stream." + username);
+        await cache.RemoveAsync("Stream." + appUser.Username);
+        eventBus.Publish(new LiveStatusEventMessage(appUser.Id, on));
         return Ok();
     }
 

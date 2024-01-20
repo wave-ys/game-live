@@ -1,4 +1,5 @@
 using GameLiveServer.Data;
+using GameLiveServer.Events;
 using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using GameLiveServer.Storage;
@@ -27,7 +28,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Cache");
     options.InstanceName = "GameLive.";
 });
-
+builder.Services.AddAppEventBus(builder.Configuration);
 builder.Services.AddAppObjectStorage(builder.Configuration);
 
 builder.Services.AddSingleton(
