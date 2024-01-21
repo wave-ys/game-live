@@ -23,9 +23,22 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
             appUser.LiveStream.ServerUrl,
             appUser.LiveStream.StreamKey,
             appUser.LiveStream.Name,
-            appUser.LiveStream.ThumbnailPath,
             appUser.LiveStream.ThumbnailContentType
         });
+    }
+
+    [HttpGet("Thumbnail")]
+    public async Task<IActionResult> GetThumbnail([FromQuery(Name = "user")] Guid userId)
+    {
+        var appUser = await dbContext.AppUsers.Include(u => u.LiveStream).SingleOrDefaultAsync(u => u.Id == userId);
+        if (appUser == null || string.IsNullOrEmpty(appUser.LiveStream.ThumbnailPath) ||
+            string.IsNullOrEmpty(appUser.LiveStream.ThumbnailContentType))
+            return NotFound();
+        
+        var stream = new MemoryStream();
+        await objectStorage.GetObjectAsync(stream, appUser.LiveStream.ThumbnailPath);
+        stream.Seek(0, SeekOrigin.Begin);
+        return File(stream, appUser.LiveStream.ThumbnailContentType);
     }
 
     [HttpPut]
@@ -35,7 +48,7 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
         var appUser = await User.GetAppUserAsync(dbContext, queryable => queryable.Include(u => u.LiveStream));
         var liveStream = appUser.LiveStream;
 
-        if (dto.Thumbnail != null)
+        if (dto.Thumbnail?.Length > 0)
         {
             if (!string.IsNullOrEmpty(liveStream.ThumbnailPath))
                 await objectStorage.RemoveObjectAsync(liveStream.ThumbnailPath);

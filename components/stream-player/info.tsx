@@ -1,7 +1,6 @@
 import {TiPencil} from "react-icons/ti";
 import {Button} from "@/components/ui/button";
-import {StreamModel} from "@/api";
-import Image from "next/image";
+import {getStreamThumbnailApiUrl, StreamModel, UserProfileModel} from "@/api";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
@@ -10,17 +9,19 @@ import {useState, useTransition} from "react";
 import {updateStreamAction} from "@/actions/stream";
 import {toast} from "sonner";
 
-export type PlayerStreamModel = Omit<StreamModel, 'serverUrl' | 'streamKey'> & {
+export type PlayerStreamModel = Omit<StreamModel, 'serverUrl' | 'streamKey' | 'thumbnailPath'> & {
   serverUrl: null;
   streamKey: null;
+  thumbnailPath: null;
 };
 
 interface StreamInfoProps {
+  userProfileModel: UserProfileModel;
   streamModel: PlayerStreamModel;
   className?: string;
 }
 
-export default function StreamInfo({streamModel, className}: StreamInfoProps) {
+export default function StreamInfo({userProfileModel, streamModel, className}: StreamInfoProps) {
   return (
     <div className={cn("m-4 rounded-xl w-full border", className)}>
       <div className={"p-4 flex space-x-4 items-center border-b"}>
@@ -40,14 +41,20 @@ export default function StreamInfo({streamModel, className}: StreamInfoProps) {
         </div>
         <div className={"space-y-2"}>
           <h3 className={"text-muted-foreground"}>Thumbnail</h3>
-          <div className="relative aspect-video rounded-md overflow-hidden w-[320px] border border-white/10">
-            <Image
-              fill
-              src={streamModel.thumbnailPath ?? ""}
-              alt={streamModel.name}
-              className="object-cover"
-            />
-          </div>
+          {
+            streamModel.thumbnailContentType ? (
+              <div className="relative aspect-video rounded-md overflow-hidden w-[320px] border border-white/10">
+                <img
+                  width={320}
+                  height={180}
+                  loading={'eager'}
+                  src={getStreamThumbnailApiUrl(userProfileModel.id)}
+                  alt={streamModel.name}
+                  className="object-cover"
+                />
+              </div>
+            ) : <p className={"font-semibold"}>Empty</p>
+          }
         </div>
       </div>
     </div>
@@ -84,6 +91,12 @@ function StreamInfoEditModal({streamModel}: { streamModel: PlayerStreamModel }) 
               </Label>
               <Input disabled={isPending} id="name" name={"name"} className="col-span-3"
                      defaultValue={streamModel.name}/>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="thumbnail" className="text-end">
+                Thumbnail
+              </Label>
+              <Input type={"file"} disabled={isPending} id="thumbnail" name={"thumbnail"} className="col-span-3"/>
             </div>
           </div>
           <DialogFooter>

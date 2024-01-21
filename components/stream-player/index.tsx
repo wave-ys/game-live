@@ -54,7 +54,7 @@ export default function StreamPlayer({className, userProfileModel, streamModel}:
           {liveStatus === 'off' && <StreamOffline username={userProfileModel.username}/>}
           {liveStatus === 'loading' && <StreamLoading/>}
         </div>
-        <StreamInfo streamModel={streamModel}/>
+        <StreamInfo streamModel={streamModel} userProfileModel={userProfileModel}/>
       </div>
       <StreamChart className={"col-span-1"}/>
     </div>
