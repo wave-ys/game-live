@@ -26,7 +26,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Cache");
     options.InstanceName = "GameLive.";
-});
+}).AddSingleton<ICacheService, CacheService>();
 builder.Services.AddAppObjectStorage(builder.Configuration);
 
 builder.Services.AddSingleton(

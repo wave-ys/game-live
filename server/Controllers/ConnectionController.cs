@@ -1,7 +1,5 @@
-using System.Text.Json;
 using GameLiveServer.Data;
 using GameLiveServer.Events;
-using GameLiveServer.Models;
 using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +18,7 @@ public class ConnectionController(
     StreamProtocols protocols,
     HttpClient httpClient,
     IDistributedCache cache,
+    ICacheService cacheService,
     IHubContext<EventHub> hubContext)
     : ControllerBase
 {
@@ -37,8 +36,10 @@ public class ConnectionController(
                 .SetProperty(s => s.ServerUrl, rtmpProtocol.ServerUrl)
                 .SetProperty(s => s.StreamKey, Guid.NewGuid())
             );
-        await cache.RemoveAsync("Stream." + appUser.Username);
-        await cache.RemoveAsync($"StreamKey.Exist.[{appUser.LiveStream.ServerUrl}].[{appUser.LiveStream.StreamKey}]");
+        await cacheService.RemoveStreamAsync(appUser.Username);
+        if (appUser.LiveStream.ServerUrl is not null && appUser.LiveStream.StreamKey is not null)
+            await cacheService.RemoveStreamExistAsync(appUser.LiveStream.ServerUrl,
+                appUser.LiveStream.StreamKey.Value.ToString());
         return Ok();
     }
 
@@ -57,23 +58,17 @@ public class ConnectionController(
             return BadRequest();
         var serverUrl = configuration.RtmpAddress + configuration.PathPrefix;
 
-        var existStr = await cache.GetStringAsync($"StreamKey.Exist.[{serverUrl}].[{streamKey}]");
-        var exist = existStr != null
-            ? existStr == "true"
-            : await dbContext.LiveStreams.AnyAsync(s =>
+        var exist = await cacheService.IsStreamExistAsync(serverUrl, streamKey.Value.ToString());
+
+        if (exist == null)
+        {
+            exist = await dbContext.LiveStreams.AnyAsync(s =>
                 s.StreamKey == streamKey &&
                 s.ServerUrl == serverUrl);
+            await cacheService.SetStreamExistAsync(serverUrl, streamKey.Value.ToString(), exist.Value);
+        }
 
-        if (existStr == null)
-            await cache.SetStringAsync(
-                $"StreamKey.Exist.[{serverUrl}].[{streamKey}]",
-                exist ? "true" : "false",
-                new DistributedCacheEntryOptions
-                {
-                    SlidingExpiration = TimeSpan.FromHours(2)
-                });
-
-        if (!exist)
+        if (!exist.Value)
             return BadRequest();
 
         return Ok();
@@ -106,7 +101,7 @@ public class ConnectionController(
                 .SetProperty(s => s.UpdatedAt, DateTime.UtcNow)
             );
 
-        await cache.RemoveAsync("Stream." + appUser.Username);
+        await cacheService.RemoveStreamAsync(appUser.Username);
         await hubContext.Clients
             .Groups("LiveStatus." + appUser.Id)
             .SendAsync("liveStatus", new LiveStatusEventMessage
@@ -133,20 +128,13 @@ public class ConnectionController(
         if (protocol == null)
             return BadRequest("Unsupported protocol");
 
-        var cacheContent = await cache.GetAsync("Stream." + username);
-        var liveStream = cacheContent == null ? null : JsonSerializer.Deserialize<LiveStream>(cacheContent);
+        var liveStream = await cacheService.GetStreamAsync(username);
         if (liveStream == null)
         {
             liveStream = await dbContext.LiveStreams
                 .Where(s => s.AppUser.Username == username)
                 .SingleOrDefaultAsync();
-            await cache.SetStringAsync(
-                "Stream." + username,
-                JsonSerializer.Serialize(liveStream),
-                new DistributedCacheEntryOptions
-                {
-                    SlidingExpiration = TimeSpan.FromHours(2)
-                });
+            await cacheService.SetStreamAsync(username, liveStream);
         }
 
         if (liveStream?.StreamKey == null || liveStream.Live == false)
