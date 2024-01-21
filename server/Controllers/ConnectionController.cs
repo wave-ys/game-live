@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace GameLiveServer.Controllers;
 
@@ -17,7 +16,6 @@ public class ConnectionController(
     AppStreamServerConfiguration configuration,
     StreamProtocols protocols,
     HttpClient httpClient,
-    IDistributedCache cache,
     ICacheService cacheService,
     IHubContext<EventHub> hubContext)
     : ControllerBase

@@ -11,4 +11,7 @@ public interface ICacheService
     public Task SetStreamAsync(string username, LiveStream? liveStream);
     public Task RemoveStreamAsync(string username);
     public Task<LiveStream?> GetStreamAsync(string username);
+
+    public Task<long> IncrementStreamViewerAsync(Guid userId);
+    public Task<long> DecrementStreamViewerAsync(Guid userId);
 }

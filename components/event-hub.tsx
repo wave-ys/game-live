@@ -5,8 +5,12 @@ import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from 
 
 interface EventHubState {
   connected: boolean;
+
   subscribeLiveStatus: (userId: string, subscriber: LiveStatusSubscriber) => Promise<void>;
   unsubscribeLiveStatus: (userId: string, subscriber: LiveStatusSubscriber) => Promise<void>;
+
+  subscribeStreamViewer: (userId: string, subscriber: StreamViewerSubscriber) => Promise<void>;
+  unsubscribeStreamViewer: (userId: string, subscriber: StreamViewerSubscriber) => Promise<void>;
 }
 
 interface LiveStatusEventMessage {
@@ -14,15 +18,24 @@ interface LiveStatusEventMessage {
   live: boolean;
 }
 
+interface StreamViewerEventMessage {
+  userId: string;
+  viewer: number;
+}
+
 type LiveStatusSubscriber = (userId: string, live: boolean) => void;
+type StreamViewerSubscriber = (userId: string, viewer: number) => void;
 
 const EventHubContext = createContext<EventHubState>({
   connected: false,
-  subscribeLiveStatus: () => Promise.resolve(),
-  unsubscribeLiveStatus: () => Promise.resolve()
+  subscribeLiveStatus: Promise.resolve,
+  unsubscribeLiveStatus: Promise.resolve,
+  subscribeStreamViewer: Promise.resolve,
+  unsubscribeStreamViewer: Promise.resolve
 })
 
 const liveStatusSubscribers = new Map<string, Set<LiveStatusSubscriber>>();
+const streamViewerSubscribers = new Map<string, Set<StreamViewerSubscriber>>();
 
 export function useEventHub() {
   return useContext(EventHubContext);
@@ -40,6 +53,10 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
 
     connection.on('liveStatus', ({userId, live}: LiveStatusEventMessage) => {
       liveStatusSubscribers.get(userId)?.forEach(subscriber => subscriber(userId, live));
+    });
+
+    connection.on('streamViewer', ({userId, viewer}: StreamViewerEventMessage) => {
+      streamViewerSubscribers.get(userId)?.forEach(subscriber => subscriber(userId, viewer));
     });
 
     connection.start().then(() => setHubConnection(connection)).catch(e => console.error(e));
@@ -60,6 +77,8 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
     const subscribers = liveStatusSubscribers.get(userId);
     if (!subscribers)
       return;
+    if (!subscribers.has(subscriber))
+      return;
     subscribers.delete(subscriber);
     if (subscribers.size === 0) {
       liveStatusSubscribers.delete(userId);
@@ -67,11 +86,34 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
     }
   }
 
+  const subscribeStreamViewer = async (userId: string, subscriber: StreamViewerSubscriber) => {
+    if (!streamViewerSubscribers.has(userId)) {
+      streamViewerSubscribers.set(userId, new Set<StreamViewerSubscriber>().add(subscriber));
+      await hubConnection?.invoke("subscribeStreamViewer", userId);
+    } else
+      streamViewerSubscribers.get(userId)!.add(subscriber);
+  }
+
+  const unsubscribeStreamViewer = async (userId: string, subscriber: StreamViewerSubscriber) => {
+    const subscribers = streamViewerSubscribers.get(userId);
+    if (!subscribers)
+      return;
+    if (!subscribers.has(subscriber))
+      return;
+    subscribers.delete(subscriber);
+    if (subscribers.size === 0) {
+      streamViewerSubscribers.delete(userId);
+      await hubConnection?.invoke("unsubscribeStreamViewer", userId);
+    }
+  }
+
   return (
     <EventHubContext.Provider value={{
       connected: !!hubConnection && hubConnection.state === HubConnectionState.Connected,
       subscribeLiveStatus,
-      unsubscribeLiveStatus
+      unsubscribeLiveStatus,
+      subscribeStreamViewer,
+      unsubscribeStreamViewer
     }}>
       {children}
     </EventHubContext.Provider>

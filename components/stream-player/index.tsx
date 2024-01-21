@@ -23,7 +23,7 @@ interface StreamPlayerProps {
   isSelf: boolean;
 }
 
-type LiveStatus = 'loading' | 'on' | 'off';
+export type LiveStatus = 'loading' | 'on' | 'off';
 
 export default function StreamPlayer({className, userProfileModel, streamModel, isSelf}: StreamPlayerProps) {
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
@@ -57,7 +57,8 @@ export default function StreamPlayer({className, userProfileModel, streamModel, 
           {liveStatus === 'loading' && <StreamLoading/>}
         </div>
         <div>
-          <StreamInfo isSelf={isSelf} className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>
+          <StreamInfo liveStatus={liveStatus} isSelf={isSelf} className={"m-4"} streamModel={streamModel}
+                      userProfileModel={userProfileModel}/>
           {isSelf &&
               <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
         </div>

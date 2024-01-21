@@ -4,6 +4,7 @@ using GameLiveServer.Protocols;
 using GameLiveServer.Security;
 using GameLiveServer.Storage;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,10 +24,17 @@ builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Cache");
-    options.InstanceName = "GameLive.";
-}).AddSingleton<ICacheService, CacheService>();
+    {
+        options.Configuration = builder.Configuration.GetConnectionString("Cache");
+        options.InstanceName = "GameLive.";
+    })
+    .AddSingleton<ICacheService, CacheService>()
+    .AddSingleton<IConnectionMultiplexer>(
+        ConnectionMultiplexer.Connect(
+            builder.Configuration.GetConnectionString("Cache")
+            ?? throw new InvalidOperationException("Cache connection string not found")
+        )
+    );
 builder.Services.AddAppObjectStorage(builder.Configuration);
 
 builder.Services.AddSingleton(

@@ -1,10 +1,11 @@
 using System.Text.Json;
 using GameLiveServer.Models;
 using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 
 namespace GameLiveServer.Data;
 
-public class CacheService(IDistributedCache cache) : ICacheService
+public class CacheService(IDistributedCache cache, IConnectionMultiplexer connectionMultiplexer) : ICacheService
 {
     public async Task SetStreamExistAsync(string serverUrl, string streamKey, bool exist)
     {
@@ -52,5 +53,21 @@ public class CacheService(IDistributedCache cache) : ICacheService
         if (bytes == null)
             return null;
         return JsonSerializer.Deserialize<LiveStream>(bytes);
+    }
+
+    public async Task<long> IncrementStreamViewerAsync(Guid userId)
+    {
+        var database = connectionMultiplexer.GetDatabase();
+        return await database.StringIncrementAsync(new RedisKey($"StreamViewer.[{userId}]"));
+    }
+
+    public async Task<long> DecrementStreamViewerAsync(Guid userId)
+    {
+        var database = connectionMultiplexer.GetDatabase();
+        var result = await database.StringDecrementAsync(new RedisKey($"StreamViewer.[{userId}]"));
+        if (result >= 0)
+            return result;
+        await database.KeyDeleteAsync(new RedisKey($"StreamViewer.[{userId}]"));
+        return 0;
     }
 }
