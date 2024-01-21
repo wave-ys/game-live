@@ -15,6 +15,13 @@ export interface UserProfileModel {
 
 export interface StreamModel {
   id: string;
+
   serverUrl: string;
   streamKey: string;
+
+  live: boolean;
+  name: string;
+
+  thumbnailContentType?: string;
+  thumbnailPath?: string;
 }

@@ -32,4 +32,16 @@ public class AppObjectStorage(AppObjectStorageConfiguration configuration, IMini
                 .WithCallbackStream((s, cancellationToken) => s.CopyToAsync(stream, cancellationToken))
         );
     }
+
+    public async Task RemoveObjectAsync(string storePath)
+    {
+        if (!await minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(configuration.BucketName)))
+            await minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(configuration.BucketName));
+
+        await minioClient.RemoveObjectAsync(
+            new RemoveObjectArgs()
+                .WithBucket(configuration.BucketName)
+                .WithObject(storePath)
+        );
+    }
 }

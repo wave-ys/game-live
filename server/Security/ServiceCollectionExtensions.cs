@@ -84,7 +84,8 @@ public static class ServiceCollectionExtensions
             LiveStream = new LiveStream
             {
                 CreatedAt = now,
-                UpdatedAt = now
+                UpdatedAt = now,
+                Name = claims["preferred_username"].Value + "'s stream"
             },
             CreatedAt = now,
             UpdatedAt = now

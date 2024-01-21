@@ -13,16 +13,17 @@ import StreamOffline from "@/components/stream-player/offline";
 import StreamLoading from "@/components/stream-player/loading";
 import {useEventHub} from "@/components/event-hub";
 import StreamChart from "@/components/stream-player/chart";
-import StreamInfo from "@/components/stream-player/info";
+import StreamInfo, {PlayerStreamModel} from "@/components/stream-player/info";
 
 interface StreamPlayerProps {
   className?: string;
   userProfileModel: UserProfileModel;
+  streamModel: PlayerStreamModel;
 }
 
 type LiveStatus = 'loading' | 'on' | 'off';
 
-export default function StreamPlayer({className, userProfileModel}: StreamPlayerProps) {
+export default function StreamPlayer({className, userProfileModel, streamModel}: StreamPlayerProps) {
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
   const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
 
@@ -37,11 +38,11 @@ export default function StreamPlayer({className, userProfileModel}: StreamPlayer
   }, [connected, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
 
   return (
-    <div className={cn("overflow-hidden h-full grid grid-cols-4", className)}>
-      <div className={"grid grid-rows-6 col-span-3"}>
-        <div className={"row-span-5"}>
+    <div className={cn("overflow-auto h-full grid grid-cols-4", className)}>
+      <div className={"h-full col-span-3"}>
+        <div className={"h-3/5"}>
           {liveStatus === 'on' && (
-            <MediaPlayer className={"h-full"} title="Sprite Fight"
+            <MediaPlayer className={"h-full"}
                          src={{
                            src: getStreamApiUrl(userProfileModel.username, "hls"),
                            type: "application/vnd.apple.mpegurl"
@@ -53,13 +54,9 @@ export default function StreamPlayer({className, userProfileModel}: StreamPlayer
           {liveStatus === 'off' && <StreamOffline username={userProfileModel.username}/>}
           {liveStatus === 'loading' && <StreamLoading/>}
         </div>
-        <div className={"row-span-1"}>
-          <StreamInfo/>
-        </div>
+        <StreamInfo streamModel={streamModel}/>
       </div>
-      <div className={"col-span-1"}>
-        <StreamChart/>
-      </div>
+      <StreamChart className={"col-span-1"}/>
     </div>
   )
 }

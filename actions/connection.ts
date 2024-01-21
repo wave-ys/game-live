@@ -5,7 +5,7 @@ import {cookies} from "next/headers";
 import {revalidatePath} from "next/cache";
 import {getUserProfileApi} from "@/api/auth";
 
-export async function generateConnectionApi() {
+export async function generateConnectionAction() {
   const self = await getUserProfileApi();
   if (self == null)
     throw new Error("Please login.")

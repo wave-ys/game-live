@@ -6,6 +6,10 @@ public class LiveStream
 
     public bool Live { get; set; }
 
+    public string Name { get; set; } = default!;
+    public string? ThumbnailPath { get; set; }
+    public string? ThumbnailContentType { get; set; }
+
     public string? ServerUrl { get; set; }
     public Guid? StreamKey { get; set; }
 
