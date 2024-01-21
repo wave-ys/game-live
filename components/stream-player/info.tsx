@@ -23,7 +23,7 @@ interface StreamInfoProps {
 
 export default function StreamInfo({userProfileModel, streamModel, className}: StreamInfoProps) {
   return (
-    <div className={cn("m-4 rounded-xl w-full border", className)}>
+    <div className={cn("m-4 rounded-xl border", className)}>
       <div className={"p-4 flex space-x-4 items-center border-b"}>
         <div className={"p-2 w-fit rounded bg-blue-600 flex-none"}>
           <TiPencil className={"w-6 h-6 text-white"}/>
