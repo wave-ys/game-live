@@ -13,17 +13,19 @@ import StreamOffline from "@/components/stream-player/offline";
 import StreamLoading from "@/components/stream-player/loading";
 import {useEventHub} from "@/components/event-hub";
 import StreamChart from "@/components/stream-player/chart";
-import StreamInfo, {PlayerStreamModel} from "@/components/stream-player/info";
+import StreamInfoEditor, {PlayerStreamModel} from "@/components/stream-player/info-editor";
+import StreamInfo from "@/components/stream-player/info";
 
 interface StreamPlayerProps {
   className?: string;
   userProfileModel: UserProfileModel;
   streamModel: PlayerStreamModel;
+  isSelf: boolean;
 }
 
 type LiveStatus = 'loading' | 'on' | 'off';
 
-export default function StreamPlayer({className, userProfileModel, streamModel}: StreamPlayerProps) {
+export default function StreamPlayer({className, userProfileModel, streamModel, isSelf}: StreamPlayerProps) {
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
   const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
 
@@ -38,9 +40,9 @@ export default function StreamPlayer({className, userProfileModel, streamModel}:
   }, [connected, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
 
   return (
-    <div className={cn("overflow-auto h-full grid grid-cols-4", className)}>
-      <div className={"h-full col-span-3"}>
-        <div className={"h-3/5"}>
+    <div className={cn("h-full grid grid-cols-4", className)}>
+      <div className={"h-full col-span-3 overflow-y-auto scroll-m-0"}>
+        <div className={"h-3/5 border-b"}>
           {liveStatus === 'on' && (
             <MediaPlayer className={"h-full"}
                          src={{
@@ -54,9 +56,13 @@ export default function StreamPlayer({className, userProfileModel, streamModel}:
           {liveStatus === 'off' && <StreamOffline username={userProfileModel.username}/>}
           {liveStatus === 'loading' && <StreamLoading/>}
         </div>
-        <StreamInfo streamModel={streamModel} userProfileModel={userProfileModel}/>
+        <div>
+          <StreamInfo isSelf={isSelf} className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>
+          {isSelf &&
+              <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
+        </div>
       </div>
-      <StreamChart className={"col-span-1"}/>
+      <StreamChart className={"border-l col-span-1"}/>
     </div>
   )
 }

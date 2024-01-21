@@ -34,7 +34,7 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
         if (appUser == null || string.IsNullOrEmpty(appUser.LiveStream.ThumbnailPath) ||
             string.IsNullOrEmpty(appUser.LiveStream.ThumbnailContentType))
             return NotFound();
-        
+
         var stream = new MemoryStream();
         await objectStorage.GetObjectAsync(stream, appUser.LiveStream.ThumbnailPath);
         stream.Seek(0, SeekOrigin.Begin);

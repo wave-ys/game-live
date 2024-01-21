@@ -1,109 +1,37 @@
-import {TiPencil} from "react-icons/ti";
-import {Button} from "@/components/ui/button";
-import {getStreamThumbnailApiUrl, StreamModel, UserProfileModel} from "@/api";
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
+import UserAvatar from "@/components/user-avatar";
+import {getAvatarApiUrl, UserProfileModel} from "@/api";
+import {PlayerStreamModel} from "@/components/stream-player/info-editor";
 import {cn} from "@/lib/utils";
-import {useState, useTransition} from "react";
-import {updateStreamAction} from "@/actions/stream";
-import {toast} from "sonner";
-
-export type PlayerStreamModel = Omit<StreamModel, 'serverUrl' | 'streamKey' | 'thumbnailPath'> & {
-  serverUrl: null;
-  streamKey: null;
-  thumbnailPath: null;
-};
+import {Button} from "@/components/ui/button";
+import {FaHeart} from "react-icons/fa";
 
 interface StreamInfoProps {
+  className?: string;
   userProfileModel: UserProfileModel;
   streamModel: PlayerStreamModel;
-  className?: string;
+  isSelf: boolean;
 }
 
-export default function StreamInfo({userProfileModel, streamModel, className}: StreamInfoProps) {
+export default function StreamInfo({className, userProfileModel, streamModel, isSelf}: StreamInfoProps) {
   return (
-    <div className={cn("m-4 rounded-xl border", className)}>
-      <div className={"p-4 flex space-x-4 items-center border-b"}>
-        <div className={"p-2 w-fit rounded bg-blue-600 flex-none"}>
-          <TiPencil className={"w-6 h-6 text-white"}/>
-        </div>
-        <div className={"flex-auto"}>
-          <h2 className={"font-semibold text-lg"}>Edit Your Stream Info</h2>
-          <p className={"text-muted-foreground"}>Maximize your visibility</p>
-        </div>
-        <StreamInfoEditModal streamModel={streamModel}/>
+    <div className={cn("flex space-x-4 items-center", className)}>
+      <UserAvatar className={"h-16 w-16 flex-none"}
+                  fallBackClassName={"h-6 w-6"}
+                  src={getAvatarApiUrl(userProfileModel.id)}
+                  alt={'avatar'}/>
+      <div className={"flex-auto space-y-0.5"}>
+        <h2 className={"font-semibold text-lg"}>{userProfileModel.username}</h2>
+        <p>{streamModel.name}</p>
+        <p className={"text-muted-foreground text-sm"}>{streamModel.live ? 'Live' : 'Offline'}</p>
       </div>
-      <div className={"p-4 space-y-4"}>
-        <div className={"space-y-2"}>
-          <h3 className={"text-muted-foreground"}>Name</h3>
-          <p className={"font-semibold"}>{streamModel.name}</p>
-        </div>
-        <div className={"space-y-2"}>
-          <h3 className={"text-muted-foreground"}>Thumbnail</h3>
-          {
-            streamModel.thumbnailContentType ? (
-              <div className="relative aspect-video rounded-md overflow-hidden w-[320px] border border-white/10">
-                <img
-                  width={320}
-                  height={180}
-                  loading={'eager'}
-                  src={getStreamThumbnailApiUrl(userProfileModel.id)}
-                  alt={streamModel.name}
-                  className="object-cover"
-                />
-              </div>
-            ) : <p className={"font-semibold"}>Empty</p>
-          }
-        </div>
-      </div>
+      {
+        !isSelf && (
+          <Button variant={"primary-blue"}>
+            <FaHeart className={"w-4 h-4 mr-2"}/>
+            Follow
+          </Button>
+        )
+      }
     </div>
-  )
-}
-
-function StreamInfoEditModal({streamModel}: { streamModel: PlayerStreamModel }) {
-  const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
-
-  async function handleSubmit(formData: FormData) {
-    startTransition(() => {
-      updateStreamAction(formData)
-        .then(() => toast.success("Updated successfully!"))
-        .catch(e => toast.error(e.message))
-        .finally(() => setOpen(false))
-    });
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"}>Edit</Button>
-      </DialogTrigger>
-      <DialogContent className="w-[525px]">
-        <DialogHeader>
-          <DialogTitle>Edit Stream Info</DialogTitle>
-        </DialogHeader>
-        <form action={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-end">
-                Name
-              </Label>
-              <Input disabled={isPending} id="name" name={"name"} className="col-span-3"
-                     defaultValue={streamModel.name}/>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="thumbnail" className="text-end">
-                Thumbnail
-              </Label>
-              <Input type={"file"} disabled={isPending} id="thumbnail" name={"thumbnail"} className="col-span-3"/>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button disabled={isPending} type="submit">Save Changes</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   )
 }

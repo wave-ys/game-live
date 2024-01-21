@@ -1,4 +1,5 @@
 import type {Config} from "tailwindcss"
+import colors from "tailwindcss/colors";
 
 const config = {
   darkMode: ["class"],
@@ -52,6 +53,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "primary-blue": {
+          DEFAULT: colors.blue["600"],
+          foreground: colors.white
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
