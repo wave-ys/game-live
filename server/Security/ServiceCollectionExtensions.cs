@@ -1,9 +1,6 @@
-using System.Net.Mime;
 using System.Security.Claims;
 using GameLiveServer.Data;
 using GameLiveServer.Models;
-using GameLiveServer.Storage;
-using GameLiveServer.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -66,21 +63,12 @@ public static class ServiceCollectionExtensions
         if (await dbContext.AppUsers.AnyAsync(u => u.ExternalId == externalId))
             return;
 
-        var avatarPath = "/avatar/" + Guid.NewGuid() + ".png";
-        var objectStorage = context.HttpContext.RequestServices.GetRequiredService<IAppObjectStorage>();
-        using var stream = new MemoryStream();
-        await AvatarUtils.GenerateRandomAvatar(stream);
-        stream.Seek(0, SeekOrigin.Begin);
-        await objectStorage.SaveObjectAsync(stream, avatarPath, MediaTypeNames.Image.Png, stream.Length);
-
         var now = DateTime.UtcNow;
         var appUser = new AppUser
         {
             ExternalId = externalId,
             Username = claims["preferred_username"].Value,
             Email = claims[ClaimTypes.Email].Value,
-            AvatarPath = avatarPath,
-            AvatarContentType = MediaTypeNames.Image.Png,
             LiveStream = new LiveStream
             {
                 CreatedAt = now,

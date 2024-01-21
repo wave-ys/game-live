@@ -13,7 +13,8 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
     public async Task<IActionResult> GetAvatar([FromQuery(Name = "user")] string userId)
     {
         var appUser = await dbContext.AppUsers.SingleOrDefaultAsync(u => u.Id.ToString() == userId);
-        if (appUser == null)
+        if (appUser == null || string.IsNullOrEmpty(appUser.AvatarPath) ||
+            string.IsNullOrEmpty(appUser.AvatarContentType))
             return NotFound();
 
         var stream = new MemoryStream();

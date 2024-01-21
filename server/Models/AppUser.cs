@@ -8,8 +8,8 @@ public class AppUser
     public string Username { get; set; } = default!;
     public string Email { get; set; } = default!;
 
-    public string AvatarPath { get; set; } = default!;
-    public string AvatarContentType { get; set; } = default!;
+    public string? AvatarPath { get; set; }
+    public string? AvatarContentType { get; set; }
 
     public LiveStream LiveStream { get; set; } = default!;
 
