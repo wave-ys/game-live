@@ -6,16 +6,26 @@ interface UserAvatarProps {
   src?: string;
   alt: string;
   className?: string;
-  fallBackClassName?: string
+  fallBackClassName?: string;
+  isLive?: boolean;
 }
 
-export default function UserAvatar({src, alt, className, fallBackClassName}: UserAvatarProps) {
+export default function UserAvatar({src, alt, className, fallBackClassName, isLive}: UserAvatarProps) {
   return (
-    <Avatar className={cn("h-9 w-9", className)}>
-      <AvatarImage src={src} alt={alt}/>
-      <AvatarFallback>
-        <FaRegUser className={cn("h-4 w-4", fallBackClassName)}/>
-      </AvatarFallback>
-    </Avatar>
+    <div className={"relative"}>
+      <Avatar
+        className={cn("h-9 w-9", isLive && "ring-2 ring-red-500 ring-offset-2 ring-offset-background", className)}>
+        <AvatarImage src={src} alt={alt}/>
+        <AvatarFallback>
+          <FaRegUser className={cn("h-4 w-4", fallBackClassName)}/>
+        </AvatarFallback>
+      </Avatar>
+      {isLive && (
+        <span
+          className={"bg-red-500 rounded px-1 py-0.5 text-xs font-semibold text-white absolute z-40 left-1/2 transform -translate-x-1/2 -bottom-2.5 border border-background"}>
+          LIVE
+        </span>
+      )}
+    </div>
   )
 }

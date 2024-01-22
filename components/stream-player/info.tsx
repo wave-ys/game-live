@@ -50,7 +50,7 @@ export default function StreamInfo({className, userProfileModel, streamModel, is
       <UserAvatar className={"h-16 w-16 flex-none"}
                   fallBackClassName={"h-6 w-6"}
                   src={getAvatarApiUrl(userProfileModel.id)}
-                  alt={'avatar'}/>
+                  alt={'avatar'} isLive={liveStatus === 'on'}/>
       <div className={"flex-auto space-y-0.5"}>
         <h2 className={"font-semibold text-lg"}>{userProfileModel.username}</h2>
         <p>{streamModel.name}</p>
