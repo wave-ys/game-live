@@ -7,6 +7,7 @@ import {Input} from "@/components/ui/input";
 import {FormEventHandler, useEffect, useState} from "react";
 import {useEventHub} from "@/components/event-hub";
 import {UserProfileModel} from "@/api";
+import {format} from "date-fns";
 
 interface StreamCharProps {
   className?: string;
@@ -38,6 +39,12 @@ interface ChatMessage {
   username: string;
   text: string;
   time: string;
+  color: string | null;
+}
+
+interface ChatUser {
+  id: string;
+  username: string;
 }
 
 export function StreamChatToggle({className}: StreamChatToggleProps) {
@@ -80,7 +87,12 @@ function ChatContent({className, chatList}: ChatContentProps) {
   return (
     <div className={className}>
       {chatList.map(message => (
-        <div key={message.id}>{message.userId} {message.text} {message.time}</div>
+        <div key={message.id} className={"space-x-1"}>
+          <span>{format(message.time, 'HH:mm')}</span>
+          <span className={cn("font-semibold text-foreground")}
+                style={message.color ? {color: message.color} : undefined}>{message.username}:</span>
+          <span>{message.text}</span>
+        </div>
       ))}
     </div>
   )
@@ -103,7 +115,8 @@ function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
 
 export default function StreamChat({className, userProfileModel}: StreamCharProps) {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
-  const {connected, subscribeChat, unsubscribeChat, sendChat} = useEventHub();
+  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
   const [loading, setLoading] = useState(0);
 
   const handleSendChat = async (text: string) => {
@@ -115,12 +128,22 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
   useEffect(() => {
     if (!connected)
       return;
-    const subscriber = (message: ChatMessage) => setChatList([...chatList, message]);
+    const subscriber = (message: ChatMessage) => setChatList(v => [...v, message]);
     subscribeChat(userProfileModel.id, subscriber).then();
     return () => {
       unsubscribeChat(userProfileModel.id, subscriber).then();
     }
-  }, [chatList, connected, subscribeChat, unsubscribeChat, userProfileModel.id]);
+  }, [connected, subscribeChat, unsubscribeChat, userProfileModel.id]);
+
+  useEffect(() => {
+    if (!connected)
+      return;
+    const subscriber = (users: ChatUser[]) => setChatUsers(users);
+    subscribeChatUsers(userProfileModel.id, subscriber).then();
+    return () => {
+      unsubscribeChatUsers(userProfileModel.id, subscriber).then();
+    }
+  }, [connected, subscribeChat, subscribeChatUsers, unsubscribeChat, unsubscribeChatUsers, userProfileModel.id]);
 
   return (
     <div className={cn("flex flex-col", className)}>

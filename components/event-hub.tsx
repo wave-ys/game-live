@@ -14,8 +14,10 @@ interface EventHubState {
 
   subscribeChat: (userId: string, subscriber: ChatSubscriber) => Promise<void>;
   unsubscribeChat: (userId: string, subscriber: ChatSubscriber) => Promise<void>;
-
   sendChat: (userId: string, text: string) => Promise<void>;
+
+  subscribeChatUsers: (userId: string, subscriber: ChatUsersSubscriber) => Promise<void>;
+  unsubscribeChatUsers: (userId: string, subscriber: ChatUsersSubscriber) => Promise<void>;
 }
 
 interface LiveStatusEventMessage {
@@ -28,6 +30,16 @@ interface StreamViewerEventMessage {
   viewer: number;
 }
 
+interface ChatUsersEventMessageItem {
+  id: string;
+  username: string;
+}
+
+interface ChatUsersEventMessage {
+  userId: string;
+  users: ChatUsersEventMessageItem[];
+}
+
 interface ChatEventMessage {
   broadcaster: string;
   id: string;
@@ -35,26 +47,35 @@ interface ChatEventMessage {
   username: string;
   text: string;
   time: string;
+  color: string | null;
 }
 
 type LiveStatusSubscriber = (userId: string, live: boolean) => void;
 type StreamViewerSubscriber = (userId: string, viewer: number) => void;
 type ChatSubscriber = (message: ChatEventMessage) => void;
+type ChatUsersSubscriber = (users: ChatUsersEventMessageItem[]) => void;
 
 const EventHubContext = createContext<EventHubState>({
   connected: false,
+
   subscribeLiveStatus: Promise.resolve,
   unsubscribeLiveStatus: Promise.resolve,
+
   subscribeStreamViewer: Promise.resolve,
   unsubscribeStreamViewer: Promise.resolve,
+
   subscribeChat: Promise.resolve,
   unsubscribeChat: Promise.resolve,
-  sendChat: Promise.resolve
+  sendChat: Promise.resolve,
+
+  subscribeChatUsers: Promise.resolve,
+  unsubscribeChatUsers: Promise.resolve
 })
 
 const liveStatusSubscribers = new Map<string, Set<LiveStatusSubscriber>>();
 const streamViewerSubscribers = new Map<string, Set<StreamViewerSubscriber>>();
 const chatSubscribers = new Map<string, Set<ChatSubscriber>>();
+const chatUsersSubscribers = new Map<string, Set<ChatUsersSubscriber>>();
 
 export function useEventHub() {
   return useContext(EventHubContext);
@@ -80,7 +101,11 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
 
     connection.on('chat', (message: ChatEventMessage) => {
       chatSubscribers.get(message.broadcaster)?.forEach(subscriber => subscriber(message));
-    })
+    });
+
+    connection.on('streamViewerUsers', (message: ChatUsersEventMessage) => {
+      chatUsersSubscribers.get(message.userId)?.forEach(subscriber => subscriber(message.users));
+    });
 
     connection.start().then(() => setHubConnection(connection)).catch(e => console.error(e));
     return () => {
@@ -155,6 +180,27 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
     hubConnection?.invoke('sendChat', userId, text);
   }
 
+  const subscribeChatUsers = async (userId: string, subscriber: ChatUsersSubscriber) => {
+    if (!chatUsersSubscribers.has(userId)) {
+      chatUsersSubscribers.set(userId, new Set<ChatUsersSubscriber>().add(subscriber));
+      await hubConnection?.invoke("subscribeChatUsers", userId);
+    } else
+      chatUsersSubscribers.get(userId)!.add(subscriber);
+  }
+
+  const unsubscribeChatUsers = async (userId: string, subscriber: ChatUsersSubscriber) => {
+    const subscribers = chatUsersSubscribers.get(userId);
+    if (!subscribers)
+      return;
+    if (!subscribers.has(subscriber))
+      return;
+    subscribers.delete(subscriber);
+    if (subscribers.size === 0) {
+      chatSubscribers.delete(userId);
+      await hubConnection?.invoke("unsubscribeChatUsers", userId);
+    }
+  }
+
 
   return (
     <EventHubContext.Provider value={{
@@ -165,7 +211,9 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
       unsubscribeStreamViewer,
       subscribeChat,
       unsubscribeChat,
-      sendChat
+      sendChat,
+      subscribeChatUsers,
+      unsubscribeChatUsers
     }}>
       {children}
     </EventHubContext.Provider>

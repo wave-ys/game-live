@@ -173,6 +173,8 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
 
     public async Task SubscribeChat(Guid userId)
     {
+        var random = new Random();
+        Context.Items["color"] = $"#{random.Next(50, 200):X2}{random.Next(50, 200):X2}{random.Next(50, 200):X2}";
         await Groups.AddToGroupAsync(Context.ConnectionId, "StreamChatUser." + userId);
     }
 
@@ -190,6 +192,7 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         {
             Id = Guid.NewGuid(),
             Broadcaster = userId,
+            Color = Context.Items.ContainsKey("color") ? Context.Items["color"] : null,
             UserId = appUser.Id,
             appUser.Username,
             Text = text,
