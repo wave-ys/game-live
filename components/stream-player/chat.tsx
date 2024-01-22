@@ -4,9 +4,13 @@ import {useStreamChat} from "@/store/use-stream-chat";
 import {RiExpandLeftLine, RiExpandRightLine} from "react-icons/ri";
 import {IoChatboxOutline, IoPeopleOutline} from "react-icons/io5";
 import {Input} from "@/components/ui/input";
+import {FormEventHandler, useEffect, useState} from "react";
+import {useEventHub} from "@/components/event-hub";
+import {UserProfileModel} from "@/api";
 
 interface StreamCharProps {
   className?: string;
+  userProfileModel: UserProfileModel;
 }
 
 interface StreamChatToggleProps {
@@ -19,10 +23,21 @@ interface ChatVariantToggleProps {
 
 interface ChatContentProps {
   className?: string;
+  chatList: ChatMessage[];
 }
 
 interface ChatInputBoxProps {
   className?: string;
+  onSubmit?: (text: string) => void;
+  loading?: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  userId: string;
+  username: string;
+  text: string;
+  time: string;
 }
 
 export function StreamChatToggle({className}: StreamChatToggleProps) {
@@ -55,24 +70,58 @@ function ChatVariantToggle({className}: ChatVariantToggleProps) {
   )
 }
 
-function ChatContent({className}: ChatContentProps) {
+function ChatContent({className, chatList}: ChatContentProps) {
+  if (chatList.length === 0)
+    return (
+      <div className={cn('flex items-center justify-center text-muted-foreground text-sm', className)}>
+        Welcome to the chat!
+      </div>
+    )
   return (
-    <div className={cn('flex items-center justify-center text-muted-foreground text-sm', className)}>
-      Welcome to the chat!
+    <div className={className}>
+      {chatList.map(message => (
+        <div key={message.id}>{message.userId} {message.text} {message.time}</div>
+      ))}
     </div>
   )
 }
 
-function ChatInputBox({className}: ChatInputBoxProps) {
+function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
+  const [value, setValue] = useState("");
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    onSubmit?.(value);
+    setValue('');
+  }
   return (
-    <form className={cn("flex space-x-2 p-2", className)}>
-      <Input name={"text"} placeholder={"Send a message"}/>
-      <Button type={"submit"}>Chat</Button>
+    <form onSubmit={handleSubmit} className={cn("flex space-x-2 p-2", className)}>
+      <Input disabled={loading} value={value} onChange={e => setValue(e.target.value)} placeholder={"Send a message"}/>
+      <Button disabled={loading} type={"submit"}>Chat</Button>
     </form>
   )
 }
 
-export default function StreamChat({className}: StreamCharProps) {
+export default function StreamChat({className, userProfileModel}: StreamCharProps) {
+  const [chatList, setChatList] = useState<ChatMessage[]>([]);
+  const {connected, subscribeChat, unsubscribeChat, sendChat} = useEventHub();
+  const [loading, setLoading] = useState(0);
+
+  const handleSendChat = async (text: string) => {
+    setLoading(v => v + 1);
+    await sendChat(userProfileModel.id, text);
+    setLoading(v => v - 1);
+  }
+
+  useEffect(() => {
+    if (!connected)
+      return;
+    const subscriber = (message: ChatMessage) => setChatList([...chatList, message]);
+    subscribeChat(userProfileModel.id, subscriber).then();
+    return () => {
+      unsubscribeChat(userProfileModel.id, subscriber).then();
+    }
+  }, [chatList, connected, subscribeChat, unsubscribeChat, userProfileModel.id]);
+
   return (
     <div className={cn("flex flex-col", className)}>
       <nav className={"flex-none border-b flex items-center p-2"}>
@@ -80,8 +129,8 @@ export default function StreamChat({className}: StreamCharProps) {
         <span className={"font-semibold flex-auto text-center"}>Stream Chat</span>
         <ChatVariantToggle className={"flex-none"}/>
       </nav>
-      <ChatContent className={"flex-auto"}/>
-      <ChatInputBox className={"flex-none"}/>
+      <ChatContent chatList={chatList} className={"flex-auto"}/>
+      <ChatInputBox loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
     </div>
   )
 }
