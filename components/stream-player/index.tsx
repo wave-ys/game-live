@@ -12,9 +12,10 @@ import {useEffect, useState} from "react";
 import StreamOffline from "@/components/stream-player/offline";
 import StreamLoading from "@/components/stream-player/loading";
 import {useEventHub} from "@/components/event-hub";
-import StreamChart from "@/components/stream-player/chart";
+import StreamChat, {StreamChatToggle} from "@/components/stream-player/chat";
 import StreamInfoEditor, {PlayerStreamModel} from "@/components/stream-player/info-editor";
 import StreamInfo from "@/components/stream-player/info";
+import {useStreamChat} from "@/store/use-stream-chat";
 
 interface StreamPlayerProps {
   className?: string;
@@ -26,6 +27,7 @@ interface StreamPlayerProps {
 export type LiveStatus = 'loading' | 'on' | 'off';
 
 export default function StreamPlayer({className, userProfileModel, streamModel, isSelf}: StreamPlayerProps) {
+  const chatCollapsed = useStreamChat(state => state.collapsed);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
   const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
 
@@ -40,8 +42,8 @@ export default function StreamPlayer({className, userProfileModel, streamModel, 
   }, [connected, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
 
   return (
-    <div className={cn("h-full grid grid-cols-4", className)}>
-      <div className={"h-full col-span-3 overflow-y-auto scroll-m-0"}>
+    <div className={cn("relative h-full grid grid-cols-4", chatCollapsed && 'grid-cols-3', className)}>
+      <div className={"h-full col-span-3 overflow-y-auto no-scrollbar"}>
         <div className={"h-3/5 border-b"}>
           {liveStatus === 'on' && (
             <MediaPlayer className={"h-full"}
@@ -63,7 +65,8 @@ export default function StreamPlayer({className, userProfileModel, streamModel, 
               <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
         </div>
       </div>
-      <StreamChart className={"border-l col-span-1"}/>
+      {!chatCollapsed && <StreamChat className={"border-l col-span-1"}/>}
+      {chatCollapsed && <StreamChatToggle className={"absolute right-2 top-2"}/>}
     </div>
   )
 }
