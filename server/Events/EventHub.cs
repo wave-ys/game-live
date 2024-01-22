@@ -185,6 +185,8 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
 
     public async Task SendChat(Guid userId, string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return;
         if (Context.User == null)
             return;
         var appUser = await Context.User.GetAppUserAsync(dbContext);

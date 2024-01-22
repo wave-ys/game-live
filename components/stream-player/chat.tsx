@@ -85,15 +85,17 @@ function ChatContent({className, chatList}: ChatContentProps) {
       </div>
     )
   return (
-    <div className={className}>
-      {chatList.map(message => (
-        <div key={message.id} className={"space-x-1"}>
-          <span>{format(message.time, 'HH:mm')}</span>
-          <span className={cn("font-semibold text-foreground")}
-                style={message.color ? {color: message.color} : undefined}>{message.username}:</span>
-          <span>{message.text}</span>
-        </div>
-      ))}
+    <div className={cn("relative", className)}>
+      <div className={"absolute bottom-0 h-fit max-h-full overflow-y-auto left-2 right-2 scroll-m-0"}>
+        {chatList.map(message => (
+          <div key={message.id} className={"space-x-1"}>
+            <span>{format(message.time, 'HH:mm')}</span>
+            <span className={cn("font-semibold text-foreground")}
+                  style={message.color ? {color: message.color} : undefined}>{message.username}:</span>
+            <span>{message.text}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -102,13 +104,15 @@ function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
   const [value, setValue] = useState("");
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
+    if (!value)
+      return;
     onSubmit?.(value);
     setValue('');
   }
   return (
     <form onSubmit={handleSubmit} className={cn("flex space-x-2 p-2", className)}>
       <Input disabled={loading} value={value} onChange={e => setValue(e.target.value)} placeholder={"Send a message"}/>
-      <Button disabled={loading} type={"submit"}>Chat</Button>
+      <Button disabled={loading || !value} type={"submit"}>Chat</Button>
     </form>
   )
 }
