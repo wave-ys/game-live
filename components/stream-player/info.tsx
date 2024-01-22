@@ -25,13 +25,9 @@ export default function StreamInfo({className, userProfileModel, streamModel, is
     if (!connected)
       return;
     const subscriber = (userId: string, viewer: number) => setViewer(viewer);
-    const cleanUp = () => unsubscribeStreamViewer(userProfileModel.id, subscriber).then();
     subscribeStreamViewer(userProfileModel.id, subscriber).then();
-
-    window.addEventListener('beforeunload', cleanUp);
     return () => {
-      cleanUp().then();
-      window.removeEventListener('beforeunload', cleanUp);
+      unsubscribeStreamViewer(userProfileModel.id, subscriber).then();
     }
   }, [connected, subscribeStreamViewer, unsubscribeStreamViewer, userProfileModel.id]);
 
