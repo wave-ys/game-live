@@ -190,7 +190,7 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         if (Context.User == null)
             return;
         var appUser = await Context.User.GetAppUserAsync(dbContext);
-        await Clients.Group("StreamChatUser." + userId).SendAsync("chat", new
+        await Clients.OthersInGroup("StreamChatUser." + userId).SendAsync("chat", new
         {
             Id = Guid.NewGuid(),
             Broadcaster = userId,
@@ -198,7 +198,19 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
             UserId = appUser.Id,
             appUser.Username,
             Text = text,
-            Time = DateTime.UtcNow
+            Time = DateTime.UtcNow,
+            Self = false
+        });
+        await Clients.Caller.SendAsync("chat", new
+        {
+            Id = Guid.NewGuid(),
+            Broadcaster = userId,
+            Color = Context.Items.ContainsKey("color") ? Context.Items["color"] : null,
+            UserId = appUser.Id,
+            appUser.Username,
+            Text = text,
+            Time = DateTime.UtcNow,
+            Self = true
         });
     }
 }

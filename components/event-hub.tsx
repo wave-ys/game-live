@@ -48,6 +48,7 @@ interface ChatEventMessage {
   text: string;
   time: string;
   color: string | null;
+  self: boolean;
 }
 
 type LiveStatusSubscriber = (userId: string, live: boolean) => void;

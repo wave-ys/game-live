@@ -4,7 +4,7 @@ import {useStreamChat} from "@/store/use-stream-chat";
 import {RiExpandLeftLine, RiExpandRightLine} from "react-icons/ri";
 import {IoChatboxOutline, IoPeopleOutline} from "react-icons/io5";
 import {Input} from "@/components/ui/input";
-import {FormEventHandler, useEffect, useState} from "react";
+import {FormEventHandler, forwardRef, useEffect, useRef, useState} from "react";
 import {useEventHub} from "@/components/event-hub";
 import {UserProfileModel} from "@/api";
 import {format} from "date-fns";
@@ -40,6 +40,7 @@ interface ChatMessage {
   text: string;
   time: string;
   color: string | null;
+  self: boolean;
 }
 
 interface ChatUser {
@@ -77,7 +78,7 @@ function ChatVariantToggle({className}: ChatVariantToggleProps) {
   )
 }
 
-function ChatContent({className, chatList}: ChatContentProps) {
+const ChatContent = forwardRef<HTMLDivElement, ChatContentProps>(function ChatContent({className, chatList}, ref) {
   if (chatList.length === 0)
     return (
       <div className={cn('flex items-center justify-center text-muted-foreground text-sm', className)}>
@@ -86,7 +87,7 @@ function ChatContent({className, chatList}: ChatContentProps) {
     )
   return (
     <div className={cn("relative", className)}>
-      <div className={"absolute bottom-0 h-fit max-h-full overflow-y-auto left-2 right-2 scroll-m-0"}>
+      <div ref={ref} className={"absolute bottom-0 h-fit max-h-full overflow-y-auto left-2 right-2 scroll-m-0"}>
         {chatList.map(message => (
           <div key={message.id} className={"space-x-1"}>
             <span>{format(message.time, 'HH:mm')}</span>
@@ -98,7 +99,7 @@ function ChatContent({className, chatList}: ChatContentProps) {
       </div>
     </div>
   )
-}
+})
 
 function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
   const [value, setValue] = useState("");
@@ -122,6 +123,7 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
   const [loading, setLoading] = useState(0);
+  const chatContentRef = useRef<HTMLDivElement>(null);
 
   const handleSendChat = async (text: string) => {
     setLoading(v => v + 1);
@@ -149,6 +151,13 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
     }
   }, [connected, subscribeChat, subscribeChatUsers, unsubscribeChat, unsubscribeChatUsers, userProfileModel.id]);
 
+  useEffect(() => {
+    if (!chatContentRef.current)
+      return;
+    if (chatList[chatList.length - 1].self)
+      chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
+  }, [chatList]);
+
   return (
     <div className={cn("flex flex-col", className)}>
       <nav className={"flex-none border-b flex items-center p-2"}>
@@ -156,7 +165,7 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
         <span className={"font-semibold flex-auto text-center"}>Stream Chat</span>
         <ChatVariantToggle className={"flex-none"}/>
       </nav>
-      <ChatContent chatList={chatList} className={"flex-auto"}/>
+      <ChatContent ref={chatContentRef} chatList={chatList} className={"flex-auto"}/>
       <ChatInputBox loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
     </div>
   )
