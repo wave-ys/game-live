@@ -4,14 +4,17 @@ import {useStreamChat} from "@/store/use-stream-chat";
 import {RiExpandLeftLine, RiExpandRightLine} from "react-icons/ri";
 import {IoChatboxOutline, IoPeopleOutline} from "react-icons/io5";
 import {Input} from "@/components/ui/input";
-import {FormEventHandler, forwardRef, useEffect, useRef, useState} from "react";
+import {FormEventHandler, forwardRef, useEffect, useMemo, useRef, useState} from "react";
 import {useEventHub} from "@/components/event-hub";
 import {UserProfileModel} from "@/api";
 import {format} from "date-fns";
+import {PlayerStreamModel} from "@/components/stream-player/info-editor";
 
 interface StreamCharProps {
   className?: string;
   userProfileModel: UserProfileModel;
+  stream: PlayerStreamModel;
+  isSelf: boolean;
 }
 
 interface StreamChatToggleProps {
@@ -31,6 +34,10 @@ interface ChatInputBoxProps {
   className?: string;
   onSubmit?: (text: string) => void;
   loading?: boolean;
+  disabled?: {
+    value: boolean;
+    reason?: string;
+  };
 }
 
 interface ChatMessage {
@@ -101,7 +108,7 @@ const ChatContent = forwardRef<HTMLDivElement, ChatContentProps>(function ChatCo
   )
 })
 
-function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
+function ChatInputBox({className, onSubmit, loading, disabled}: ChatInputBoxProps) {
   const [value, setValue] = useState("");
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -112,13 +119,14 @@ function ChatInputBox({className, onSubmit, loading}: ChatInputBoxProps) {
   }
   return (
     <form onSubmit={handleSubmit} className={cn("flex space-x-2 p-2", className)}>
-      <Input disabled={loading} value={value} onChange={e => setValue(e.target.value)} placeholder={"Send a message"}/>
-      <Button disabled={loading || !value} type={"submit"}>Chat</Button>
+      <Input disabled={loading || disabled?.value} value={value} onChange={e => setValue(e.target.value)}
+             placeholder={disabled?.reason ?? "Send a message"}/>
+      <Button disabled={loading || !value || disabled?.value} type={"submit"}>Chat</Button>
     </form>
   )
 }
 
-export default function StreamChat({className, userProfileModel}: StreamCharProps) {
+export default function StreamChat({className, userProfileModel, isSelf, stream}: StreamCharProps) {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
@@ -158,6 +166,17 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
       chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
   }, [chatList]);
 
+  const disabled = useMemo(() => {
+    if (!isSelf && !stream.chatEnabled)
+      return {
+        value: true,
+        reason: "Chat is disabled"
+      }
+    return {
+      value: false
+    }
+  }, [isSelf, stream.chatEnabled]);
+
   return (
     <div className={cn("flex flex-col", className)}>
       <nav className={"flex-none border-b flex items-center p-2"}>
@@ -166,7 +185,7 @@ export default function StreamChat({className, userProfileModel}: StreamCharProp
         <ChatVariantToggle className={"flex-none"}/>
       </nav>
       <ChatContent ref={chatContentRef} chatList={chatList} className={"flex-auto"}/>
-      <ChatInputBox loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
+      <ChatInputBox disabled={disabled} loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
     </div>
   )
 }

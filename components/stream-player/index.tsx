@@ -65,7 +65,8 @@ export default function StreamPlayer({className, userProfileModel, streamModel, 
               <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
         </div>
       </div>
-      {!chatCollapsed && <StreamChat userProfileModel={userProfileModel} className={"border-l col-span-1"}/>}
+      {!chatCollapsed && <StreamChat isSelf={isSelf} stream={streamModel} userProfileModel={userProfileModel}
+                                     className={"border-l col-span-1"}/>}
       {chatCollapsed && <StreamChatToggle className={"absolute right-2 top-2"}/>}
     </div>
   )

@@ -11,6 +11,10 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
 
     public DbSet<BroadcasterViewer> BroadcasterViewers { get; set; } = default!;
 
+    public DbSet<Follow> Follows { get; set; } = default!;
+
+    public DbSet<Block> Blocks { get; set; } = default!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AppUser>().Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
@@ -31,5 +35,35 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<AppUser>()
             .HasMany<BroadcasterViewer>(u => u.Viewers)
             .WithOne(v => v.Broadcaster);
+
+        modelBuilder.Entity<Follow>().Property(f => f.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<Follow>().HasIndex(f => new { f.FollowerId, f.FollowingId }).IsUnique();
+
+        modelBuilder.Entity<Follow>()
+            .HasOne(f => f.Follower)
+            .WithMany(u => u.Following)
+            .HasForeignKey(f => f.FollowerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Follow>()
+            .HasOne(f => f.Following)
+            .WithMany(u => u.Followers)
+            .HasForeignKey(f => f.FollowingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Block>().Property(b => b.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<Block>().HasIndex(b => new { b.BlockerId, b.BlockingId }).IsUnique();
+
+        modelBuilder.Entity<Block>()
+            .HasOne(b => b.Blocker)
+            .WithMany(u => u.Blocking)
+            .HasForeignKey(b => b.BlockerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Block>()
+            .HasOne(b => b.Blocking)
+            .WithMany(u => u.Blockers)
+            .HasForeignKey(b => b.BlockingId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
