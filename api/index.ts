@@ -25,4 +25,7 @@ export interface StreamModel {
 
   thumbnailContentType?: string;
   thumbnailPath?: string;
+
+  chatEnabled: boolean;
+  chatFollowersOnly: boolean;
 }

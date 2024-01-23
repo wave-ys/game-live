@@ -23,7 +23,9 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
             appUser.LiveStream.ServerUrl,
             appUser.LiveStream.StreamKey,
             appUser.LiveStream.Name,
-            appUser.LiveStream.ThumbnailContentType
+            appUser.LiveStream.ThumbnailContentType,
+            appUser.LiveStream.ChatEnabled,
+            appUser.LiveStream.ChatFollowersOnly
         });
     }
 
@@ -65,6 +67,12 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
         if (dto.Name != null)
             liveStream.Name = dto.Name;
 
+        if (dto.ChatEnabled != null)
+            liveStream.ChatEnabled = dto.ChatEnabled.Value;
+
+        if (dto.ChatFollowersOnly != null)
+            liveStream.ChatFollowersOnly = dto.ChatFollowersOnly.Value;
+
         dbContext.LiveStreams.Update(liveStream);
         await dbContext.SaveChangesAsync();
         return Ok();
@@ -75,4 +83,6 @@ public class UpdateStreamDto
 {
     public string? Name { get; set; } = default!;
     public IFormFile? Thumbnail { get; set; } = default!;
+    public bool? ChatEnabled { get; set; }
+    public bool? ChatFollowersOnly { get; set; }
 }

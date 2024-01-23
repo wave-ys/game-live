@@ -10,6 +10,9 @@ public class LiveStream
     public string? ThumbnailPath { get; set; }
     public string? ThumbnailContentType { get; set; }
 
+    public bool ChatEnabled { get; set; } = true;
+    public bool ChatFollowersOnly { get; set; } = false;
+
     public string? ServerUrl { get; set; }
     public Guid? StreamKey { get; set; }
 
