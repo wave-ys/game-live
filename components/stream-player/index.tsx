@@ -16,6 +16,7 @@ import StreamChat, {StreamChatToggle} from "@/components/stream-player/chat";
 import StreamInfoEditor, {PlayerStreamModel} from "@/components/stream-player/info-editor";
 import StreamInfo from "@/components/stream-player/info";
 import {useStreamChat} from "@/store/use-stream-chat";
+import {useRouter} from "next/navigation";
 
 interface StreamPlayerProps {
   className?: string;
@@ -42,16 +43,23 @@ export default function StreamPlayer(
   const chatCollapsed = useStreamChat(state => state.collapsed);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
   const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
+  const router = useRouter();
 
   useEffect(() => {
     if (!connected)
       return;
-    const subscriber = (userId: string, live: boolean) => setLiveStatus(live ? 'on' : 'off');
+    const subscriber = (userId: string, live: boolean) => {
+      const newLiveStatus = live ? 'on' : 'off';
+      if (newLiveStatus !== liveStatus) {
+        setLiveStatus(newLiveStatus);
+        router.refresh();
+      }
+    }
     subscribeLiveStatus(userProfileModel.id, subscriber).then();
     return () => {
       unsubscribeLiveStatus(userProfileModel.id, subscriber).then()
     }
-  }, [connected, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
+  }, [connected, router, liveStatus, subscribeLiveStatus, unsubscribeLiveStatus, userProfileModel.id]);
 
   return (
     <div className={cn("relative h-full grid grid-cols-4", chatCollapsed && 'grid-cols-3', className)}>
