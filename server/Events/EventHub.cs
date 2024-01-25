@@ -131,12 +131,17 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
             .Select(u => new
             {
                 u.Id,
-                u.Username
+                u.Username,
+                Blocked = u.Blockers.Any(b => b.BlockerId == userId)
             })
             .ToListAsync();
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "StreamViewerUser." + userId);
-        await Clients.Group("StreamViewerUser." + userId).SendAsync("streamViewerUsers", list);
+        await Clients.Group("StreamViewerUser." + userId).SendAsync("streamViewerUsers", new
+        {
+            UserId = userId,
+            Users = list
+        });
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -169,10 +174,15 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
                 .Select(u => new
                 {
                     u.Id,
-                    u.Username
+                    u.Username,
+                    Blocked = u.Blockers.Any(b => b.BlockerId == broadcaster)
                 })
                 .ToListAsync();
-            await Clients.Group("StreamViewerUser." + broadcaster).SendAsync("streamViewerUsers", list);
+            await Clients.Group("StreamViewerUser." + broadcaster).SendAsync("streamViewerUsers", new
+            {
+                UserId = broadcaster,
+                Users = list
+            });
         }
     }
 
