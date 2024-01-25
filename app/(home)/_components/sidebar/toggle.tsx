@@ -26,7 +26,7 @@ export default function SidebarToggle({className}: ToggleProps) {
 
   return (
     <span className={"flex justify-between mb-3.5"}>
-      {!collapsed && <h1 className={"font-bold text-lg ml-3.5"}>For You</h1>}
+      {!collapsed && <h1 className={"font-bold text-lg ms-3.5"}>For You</h1>}
       <Hint text={collapsed ? "Expand" : "Collapse"}>
         <Button ref={ref} onClick={handleToggle} size={"icon"} variant={"ghost"}
                 className={cn("h-8 w-8 mx-2", className)}>

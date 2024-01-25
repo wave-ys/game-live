@@ -54,7 +54,7 @@ export default function StreamInfo({
       return 'Loading...';
     return liveStatus === 'on' ? (
       <span className={"inline-flex items-center"}>
-        <LuUser className={"mr-1"}/> {viewer} viewers
+        <LuUser className={"me-1"}/> {viewer} viewers
       </span>
     ) : 'Offline';
   }, [liveStatus, viewer])
@@ -74,7 +74,7 @@ export default function StreamInfo({
         !isSelf && (
           <Button disabled={isFollowPending} variant={isFollower ? "secondary" : "primary-blue"}
                   onClick={handleToggleFollow}>
-            <FaHeart className={"w-4 h-4 mr-2"}/>
+            <FaHeart className={"w-4 h-4 me-2"}/>
             {isFollower ? "Unfollow" : "Follow"}
           </Button>
         )

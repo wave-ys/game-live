@@ -27,11 +27,11 @@ export default function UserItem({item}: UserItemProps) {
         isLive={item.isLive}
         alt={item.username}/>
       {!collapsed && (
-        <p className={"truncate text-sm ml-3 font-semibold"}>
+        <p className={"truncate text-sm ms-3 font-semibold"}>
           {item.username}
         </p>
       )}
-      {!collapsed && item.isLive && <LiveBadge className={"ml-auto"}/>}
+      {!collapsed && item.isLive && <LiveBadge className={"ms-auto"}/>}
     </Link>
   )
 }

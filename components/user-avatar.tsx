@@ -16,7 +16,7 @@ export default function UserAvatar({src, alt, className, fallBackClassName, isLi
       <Avatar
         className={cn("h-9 w-9", isLive && "ring-2 ring-red-500 ring-offset-2 ring-offset-background", className)}>
         <AvatarImage src={src} alt={alt}/>
-        <AvatarFallback>
+        <AvatarFallback delayMs={1000}>
           <FaRegUser className={cn("h-4 w-4", fallBackClassName)}/>
         </AvatarFallback>
       </Avatar>

@@ -8,7 +8,7 @@ export default function PageMain({children}: { children?: React.ReactNode }) {
   const collapsed = useHomeSidebar(state => state.collapsed)
 
   return (
-    <div className={cn(collapsed ? "ml-12" : "ml-64")}>
+    <div className={cn(collapsed ? "ms-12" : "ms-64")}>
       {children}
     </div>
   )
