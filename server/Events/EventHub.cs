@@ -211,6 +211,8 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         if (liveStream.ChatFollowersOnly &&
             !await dbContext.Follows.AnyAsync(f => f.FollowerId == appUser.Id && f.FollowingId == userId))
             return;
+        if (await dbContext.Blocks.AnyAsync(b => b.BlockingId == appUser.Id && b.BlockerId == userId))
+            return;
         await Clients.OthersInGroup("StreamChatUser." + userId).SendAsync("chat", new
         {
             Id = Guid.NewGuid(),

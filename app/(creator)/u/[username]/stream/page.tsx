@@ -10,7 +10,7 @@ export default async function StreamPage() {
 
   return (
     <div className={"h-[calc(100vh-3.5rem)]"}>
-      <StreamPlayer isSelf={true} userProfileModel={self} isFollower={false} hasAuthenticated={true}
+      <StreamPlayer isSelf={true} userProfileModel={self} isFollower={false} hasAuthenticated={true} self={self}
                     streamModel={{...stream, serverUrl: null, streamKey: null, thumbnailPath: null}}/>
     </div>
   )

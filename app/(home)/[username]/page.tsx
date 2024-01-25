@@ -4,6 +4,7 @@ import StreamPlayer from "@/components/stream-player";
 import {isFollowingApi} from "@/api/follow";
 import {getUserProfileApi} from "@/api/auth";
 import {redirect} from "next/navigation";
+import {isBlockedByApi} from "@/api/block";
 
 
 interface UserPageProps {
@@ -25,12 +26,15 @@ export default async function UserPage({params}: UserPageProps) {
   if (self?.id === user.id)
     redirect(`/u/${params.username}/stream`);
 
+  if (await isBlockedByApi(user.id))
+    return <>Error: You have been blocked.</>
+
   const isFollower = await isFollowingApi(user.id);
 
   return (
     <div className={"h-[calc(100vh-3.5rem)]"}>
       <StreamPlayer isSelf={!!self && self.id === user.id} userProfileModel={user} isFollower={isFollower}
-                    hasAuthenticated={!!self}
+                    hasAuthenticated={!!self} self={self}
                     streamModel={{...stream, serverUrl: null, streamKey: null, thumbnailPath: null}}/>
     </div>
   )

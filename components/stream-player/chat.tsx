@@ -11,10 +11,12 @@ import {format} from "date-fns";
 import {PlayerStreamModel} from "@/components/stream-player/info-editor";
 import {CgBlock, CgUnblock} from "react-icons/cg";
 import {toggleBlockAction} from "@/actions/block";
+import {useRouter} from "next/navigation";
 
 interface StreamCharProps {
   className?: string;
   userProfileModel: UserProfileModel;
+  self: UserProfileModel | null;
   stream: PlayerStreamModel;
   isSelf: boolean;
   isFollower: boolean;
@@ -163,13 +165,21 @@ export function StreamCommunity({chatUsers, isSelf}: StreamCommunityProps) {
   )
 }
 
-export default function StreamChat({className, userProfileModel, isSelf, stream, hasAuthenticated}: StreamCharProps) {
+export default function StreamChat({
+                                     className,
+                                     userProfileModel,
+                                     isSelf,
+                                     stream,
+                                     hasAuthenticated,
+                                     self
+                                   }: StreamCharProps) {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
   const [loading, setLoading] = useState(0);
   const chatContentRef = useRef<HTMLDivElement>(null);
   const streamVariant = useStreamChat(state => state.variant);
+  const router = useRouter();
 
   const handleSendChat = async (text: string) => {
     setLoading(v => v + 1);
@@ -205,6 +215,13 @@ export default function StreamChat({className, userProfileModel, isSelf, stream,
   }, [chatList]);
 
   const disabled = useMemo(() => {
+    if (chatUsers.find(u => u.id === self?.id)?.blocked !== false) {
+      router.refresh();
+      return {
+        value: true,
+        reason: "You have been blocked"
+      }
+    }
     if (!hasAuthenticated)
       return {
         value: true,
@@ -223,7 +240,7 @@ export default function StreamChat({className, userProfileModel, isSelf, stream,
     return {
       value: false
     }
-  }, [hasAuthenticated, isSelf, stream.chatEnabled, stream.chatFollowersOnly]);
+  }, [chatUsers, hasAuthenticated, isSelf, self?.id, stream.chatEnabled, stream.chatFollowersOnly]);
 
   return (
     <div className={cn("flex flex-col", className)}>
