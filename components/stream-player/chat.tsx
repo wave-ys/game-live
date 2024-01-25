@@ -42,6 +42,10 @@ interface ChatInputBoxProps {
   };
 }
 
+interface StreamCommunityProps {
+  chatUsers: ChatUser[]
+}
+
 interface ChatMessage {
   id: string;
   userId: string;
@@ -55,6 +59,7 @@ interface ChatMessage {
 interface ChatUser {
   id: string;
   username: string;
+  blocked: boolean;
 }
 
 export function StreamChatToggle({className}: StreamChatToggleProps) {
@@ -128,12 +133,19 @@ function ChatInputBox({className, onSubmit, loading, disabled}: ChatInputBoxProp
   )
 }
 
+export function StreamCommunity({chatUsers}: StreamCommunityProps) {
+  return (
+    <>{chatUsers.length}</>
+  )
+}
+
 export default function StreamChat({className, userProfileModel, isSelf, stream, hasAuthenticated}: StreamCharProps) {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
   const [loading, setLoading] = useState(0);
   const chatContentRef = useRef<HTMLDivElement>(null);
+  const streamVariant = useStreamChat(state => state.variant);
 
   const handleSendChat = async (text: string) => {
     setLoading(v => v + 1);
@@ -196,8 +208,15 @@ export default function StreamChat({className, userProfileModel, isSelf, stream,
         <span className={"font-semibold flex-auto text-center"}>Stream Chat</span>
         <ChatVariantToggle className={"flex-none"}/>
       </nav>
-      <ChatContent ref={chatContentRef} chatList={chatList} className={"flex-auto"}/>
-      <ChatInputBox disabled={disabled} loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
+      {streamVariant === "chat" && (
+        <>
+          <ChatContent ref={chatContentRef} chatList={chatList} className={"flex-auto"}/>
+          <ChatInputBox disabled={disabled} loading={!!loading} onSubmit={handleSendChat} className={"flex-none"}/>
+        </>
+      )}
+      {streamVariant === "community" && (
+        <StreamCommunity chatUsers={chatUsers}/>
+      )}
     </div>
   )
 }

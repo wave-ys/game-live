@@ -33,6 +33,7 @@ interface StreamViewerEventMessage {
 interface ChatUsersEventMessageItem {
   id: string;
   username: string;
+  blocked: boolean;
 }
 
 interface ChatUsersEventMessage {
