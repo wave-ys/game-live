@@ -215,7 +215,7 @@ export default function StreamChat({
   }, [chatList]);
 
   const disabled = useMemo(() => {
-    if (chatUsers.find(u => u.id === self?.id)?.blocked !== false) {
+    if (chatUsers.find(u => u.id === self?.id)?.blocked === true) {
       router.refresh();
       return {
         value: true,
@@ -240,7 +240,7 @@ export default function StreamChat({
     return {
       value: false
     }
-  }, [chatUsers, hasAuthenticated, isSelf, self?.id, stream.chatEnabled, stream.chatFollowersOnly]);
+  }, [chatUsers, hasAuthenticated, isSelf, router, self?.id, stream.chatEnabled, stream.chatFollowersOnly]);
 
   return (
     <div className={cn("flex flex-col", className)}>

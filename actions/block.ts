@@ -1,7 +1,6 @@
 'use server';
 
 import {PATH_PREFIX} from "@/api";
-import {revalidatePath} from "next/cache";
 import {cookies} from "next/headers";
 import {getUserProfileApi} from "@/api/auth";
 
@@ -19,5 +18,4 @@ export async function toggleBlockAction(otherId: string, status: boolean) {
     throw new Error("Please login again.")
   if (!response.ok)
     throw new Error("Some errors occurred. Please try again.");
-  revalidatePath('/');
 }
