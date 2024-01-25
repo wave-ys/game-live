@@ -1,7 +1,7 @@
 import {PATH_PREFIX, SidebarItemModel} from "@/api/index";
 import {cookies} from "next/headers";
 
-export async function checkFollowStatusApi(otherId: string) {
+export async function isFollowingApi(otherId: string) {
   const response = await fetch(`${PATH_PREFIX}/api/follow/is-following/${otherId}`, {
     headers: {
       ["Cookie"]: cookies().toString()

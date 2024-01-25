@@ -1,7 +1,7 @@
 import {PATH_PREFIX} from "@/api/index";
 import {cookies} from "next/headers";
 
-export async function checkBlockStatusApi(otherId: string) {
+export async function isBlockedByApi(otherId: string) {
   const response = await fetch(`${PATH_PREFIX}/api/block/is-blocked-by/${otherId}`, {
     headers: {
       ["Cookie"]: cookies().toString()

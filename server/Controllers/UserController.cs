@@ -22,4 +22,17 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
         stream.Seek(0, SeekOrigin.Begin);
         return File(stream, appUser.AvatarContentType);
     }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetUserById(Guid id)
+    {
+        var user = await dbContext.AppUsers.SingleOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+            return NotFound();
+        return Ok(new
+        {
+            user.Id,
+            user.Username
+        });
+    }
 }
