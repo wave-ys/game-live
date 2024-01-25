@@ -8,9 +8,10 @@ interface UserAvatarProps {
   className?: string;
   fallBackClassName?: string;
   isLive?: boolean;
+  hideBadge?: boolean;
 }
 
-export default function UserAvatar({src, alt, className, fallBackClassName, isLive}: UserAvatarProps) {
+export default function UserAvatar({src, alt, className, fallBackClassName, isLive, hideBadge}: UserAvatarProps) {
   return (
     <div className={"relative"}>
       <Avatar
@@ -20,7 +21,7 @@ export default function UserAvatar({src, alt, className, fallBackClassName, isLi
           <FaRegUser className={cn("h-4 w-4", fallBackClassName)}/>
         </AvatarFallback>
       </Avatar>
-      {isLive && (
+      {isLive && !hideBadge && (
         <span
           className={"bg-red-500 rounded px-1 py-0.5 text-xs font-semibold text-white absolute z-40 left-1/2 transform -translate-x-1/2 -bottom-2.5 border border-background"}>
           LIVE

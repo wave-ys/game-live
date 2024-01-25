@@ -24,7 +24,7 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
         stream.Seek(0, SeekOrigin.Begin);
         return File(stream, appUser.AvatarContentType);
     }
-    
+
     [HttpGet("Avatar/Me")]
     [Authorize]
     public async Task<IActionResult> GetMyAvatar()
@@ -32,7 +32,7 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
         var appUser = await User.GetAppUserAsync(dbContext);
         if (string.IsNullOrEmpty(appUser.AvatarPath) || string.IsNullOrEmpty(appUser.AvatarContentType))
             return NotFound();
-        
+
         var stream = new MemoryStream();
         await objectStorage.GetObjectAsync(stream, appUser.AvatarPath);
         stream.Seek(0, SeekOrigin.Begin);
@@ -71,11 +71,11 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
     {
         if (form.Avatar == null || form.Avatar.Length == 0)
             return Ok();
-        
+
         var appUser = await User.GetAppUserAsync(dbContext);
         if (appUser.AvatarPath != null)
             await objectStorage.RemoveObjectAsync(appUser.AvatarPath);
-        
+
         var extension = form.Avatar.FileName[(form.Avatar.FileName.LastIndexOf('.') + 1)..];
         var avatarPath = "/avatar/" + Guid.NewGuid() + "." + extension;
         await objectStorage.SaveObjectAsync(form.Avatar.OpenReadStream(), avatarPath,

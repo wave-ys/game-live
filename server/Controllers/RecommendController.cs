@@ -22,12 +22,13 @@ public class RecommendedController(AppDbContext dbContext) : ControllerBase
                 u.Blocking.All(b => b.BlockingId != appUser.Id));
         }
 
-        var users = await queryable.OrderByDescending(u => u.CreatedAt).Select(u => new
+        var users = await queryable.Include(u => u.LiveStream).OrderByDescending(u => u.CreatedAt).Select(u => new
         {
             u.Id,
             u.Username,
-            IsLive = u.LiveStream.Live
-        }).ToListAsync();
+            IsLive = u.LiveStream.Live,
+            StreamName = u.LiveStream.Name
+        }).OrderBy(t => t.IsLive ? 0 : 1).ToListAsync();
 
         return Ok(users);
     }

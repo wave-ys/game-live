@@ -53,7 +53,7 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
         var appUser = await dbContext.AppUsers.Include(u => u.LiveStream).SingleOrDefaultAsync(u => u.Id == userId);
         if (appUser == null || string.IsNullOrEmpty(appUser.LiveStream.ThumbnailPath) ||
             string.IsNullOrEmpty(appUser.LiveStream.ThumbnailContentType))
-            return NotFound();
+            return Redirect("/default-cover.jpeg");
 
         var stream = new MemoryStream();
         await objectStorage.GetObjectAsync(stream, appUser.LiveStream.ThumbnailPath);

@@ -18,6 +18,7 @@ export interface UserProfileModel {
 
 export interface SidebarItemModel {
   id: string;
+  streamName: string;
   username: string;
   isLive: boolean;
 }

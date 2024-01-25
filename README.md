@@ -2,8 +2,8 @@
 
 A live-streaming web app. Motivated by [next14-twitch-clone](https://github.com/AntonioErdeljac/next14-twitch-clone).
 
-The difference is all third-party dependencies are set up by docker compose, so **you don't need to register accounts on
-third party websites and copy secret keys!**
+All third-party dependencies are set up by docker compose, so you don't need to register accounts on
+third party websites and copy secret keys.
 
 ## How to run
 
