@@ -69,7 +69,7 @@ export default function StreamPlayer({
         </div>
         <div>
           <StreamInfo liveStatus={liveStatus} isSelf={isSelf} className={"m-4"} streamModel={streamModel}
-                      userProfileModel={userProfileModel}/>
+                      userProfileModel={userProfileModel} isFollower={isFollower}/>
           {isSelf &&
               <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
         </div>

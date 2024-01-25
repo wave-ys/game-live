@@ -5,21 +5,39 @@ import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {FaHeart} from "react-icons/fa";
 import {useEventHub} from "@/components/event-hub";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState, useTransition} from "react";
 import {LiveStatus} from "@/components/stream-player/index";
 import {LuUser} from "react-icons/lu";
+import {toggleFollowAction} from "@/actions/follow";
+import {toast} from "sonner";
 
 interface StreamInfoProps {
   className?: string;
   userProfileModel: UserProfileModel;
   streamModel: PlayerStreamModel;
   isSelf: boolean;
-  liveStatus: LiveStatus
+  liveStatus: LiveStatus;
+  isFollower: boolean;
 }
 
-export default function StreamInfo({className, userProfileModel, streamModel, isSelf, liveStatus}: StreamInfoProps) {
+export default function StreamInfo({
+                                     className,
+                                     userProfileModel,
+                                     streamModel,
+                                     isSelf,
+                                     liveStatus,
+                                     isFollower
+                                   }: StreamInfoProps) {
   const {connected, subscribeStreamViewer, unsubscribeStreamViewer} = useEventHub();
   const [viewer, setViewer] = useState(0);
+
+  const [isFollowPending, startFollowTransition] = useTransition();
+
+  const handleToggleFollow = () => {
+    startFollowTransition(() => {
+      toggleFollowAction(userProfileModel.id, !isFollower).catch(e => toast.error(e.message));
+    })
+  }
 
   useEffect(() => {
     if (!connected)
@@ -54,9 +72,10 @@ export default function StreamInfo({className, userProfileModel, streamModel, is
       </div>
       {
         !isSelf && (
-          <Button variant={"primary-blue"}>
+          <Button disabled={isFollowPending} variant={isFollower ? "secondary" : "primary-blue"}
+                  onClick={handleToggleFollow}>
             <FaHeart className={"w-4 h-4 mr-2"}/>
-            Follow
+            {isFollower ? "Unfollow" : "Follow"}
           </Button>
         )
       }
