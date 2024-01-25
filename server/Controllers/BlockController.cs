@@ -86,4 +86,21 @@ public class BlockController(AppDbContext dbContext, IHubContext<EventHub> hubCo
             Users = list
         });
     }
+
+    [HttpGet("users")]
+    [Authorize]
+    public async Task<IActionResult> GetBlockedUsers()
+    {
+        var appUser = await User.GetAppUserAsync(dbContext);
+        var list = await dbContext.Blocks
+            .Where(b => b.BlockerId == appUser.Id)
+            .Select(b => new
+            {
+                b.Blocking.Id,
+                b.Blocking.Username,
+                b.CreatedAt
+            })
+            .ToListAsync();
+        return Ok(list);
+    }
 }

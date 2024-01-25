@@ -20,6 +20,12 @@ export interface SidebarItemModel {
   isLive: boolean;
 }
 
+export interface BlockedUserModel {
+  id: string;
+  username: string;
+  createdAt: string;
+}
+
 export interface StreamModel {
   id: string;
 
