@@ -207,13 +207,11 @@ export default function StreamChat({
   }, [connected, subscribeChat, unsubscribeChat, userProfileModel.id]);
 
   useEffect(() => {
-    console.log("subscribe chat users", connected);
     if (!connected)
       return;
     const subscriber = (users: ChatUser[]) => setChatUsers(users);
     subscribeChatUsers(userProfileModel.id, subscriber).then();
     return () => {
-      console.log("unsubscribe chat users");
       unsubscribeChatUsers(userProfileModel.id, subscriber).then();
     }
   }, [connected, subscribeChat, subscribeChatUsers, unsubscribeChat, unsubscribeChatUsers, userProfileModel.id]);
