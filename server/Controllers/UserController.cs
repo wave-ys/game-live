@@ -26,9 +26,10 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
     }
 
     [HttpGet("Avatar/Me")]
-    [Authorize]
     public async Task<IActionResult> GetMyAvatar()
     {
+        if (User.Identity?.IsAuthenticated != true)
+            return NotFound();
         var appUser = await User.GetAppUserAsync(dbContext);
         if (string.IsNullOrEmpty(appUser.AvatarPath) || string.IsNullOrEmpty(appUser.AvatarContentType))
             return NotFound();
