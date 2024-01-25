@@ -23,6 +23,7 @@ interface StreamPlayerProps {
   streamModel: PlayerStreamModel;
   isSelf: boolean;
   isFollower: boolean;
+  hasAuthenticated: boolean;
 }
 
 export type LiveStatus = 'loading' | 'on' | 'off';
@@ -32,7 +33,8 @@ export default function StreamPlayer({
                                        userProfileModel,
                                        streamModel,
                                        isSelf,
-                                       isFollower
+                                       isFollower,
+                                       hasAuthenticated
                                      }: StreamPlayerProps) {
   const chatCollapsed = useStreamChat(state => state.collapsed);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
@@ -74,6 +76,7 @@ export default function StreamPlayer({
       </div>
       {!chatCollapsed &&
           <StreamChat isFollower={isFollower} isSelf={isSelf} stream={streamModel} userProfileModel={userProfileModel}
+                      hasAuthenticated={hasAuthenticated}
                       className={"border-l col-span-1"}/>}
       {chatCollapsed && <StreamChatToggle className={"absolute right-2 top-2"}/>}
     </div>

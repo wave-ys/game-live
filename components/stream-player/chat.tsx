@@ -16,6 +16,7 @@ interface StreamCharProps {
   stream: PlayerStreamModel;
   isSelf: boolean;
   isFollower: boolean;
+  hasAuthenticated: boolean;
 }
 
 interface StreamChatToggleProps {
@@ -127,7 +128,7 @@ function ChatInputBox({className, onSubmit, loading, disabled}: ChatInputBoxProp
   )
 }
 
-export default function StreamChat({className, userProfileModel, isSelf, stream}: StreamCharProps) {
+export default function StreamChat({className, userProfileModel, isSelf, stream, hasAuthenticated}: StreamCharProps) {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const {connected, subscribeChat, unsubscribeChat, sendChat, subscribeChatUsers, unsubscribeChatUsers} = useEventHub();
@@ -168,6 +169,11 @@ export default function StreamChat({className, userProfileModel, isSelf, stream}
   }, [chatList]);
 
   const disabled = useMemo(() => {
+    if (!hasAuthenticated)
+      return {
+        value: true,
+        reason: "Please login to chat"
+      }
     if (!isSelf && !stream.chatEnabled)
       return {
         value: true,

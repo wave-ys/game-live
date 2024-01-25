@@ -32,9 +32,10 @@ public class FollowController(AppDbContext dbContext) : ControllerBase
     }
 
     [HttpGet("is-following/{other:guid}")]
-    [Authorize]
     public async Task<IActionResult> CheckStatus(Guid other)
     {
+        if (User.Identity?.IsAuthenticated != true)
+            return Ok("false");
         var appUser = await User.GetAppUserAsync(dbContext);
 
         var otherUser = await dbContext.AppUsers.SingleOrDefaultAsync(u => u.Id == other);

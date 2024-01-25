@@ -75,7 +75,7 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         var liveStream = await dbContext.LiveStreams.SingleOrDefaultAsync(s => s.AppUserId == userId);
         if (liveStream == null)
             return;
-        if (Context.User != null)
+        if (Context.User?.Identity?.IsAuthenticated == true)
         {
             var viewer = await Context.User.GetAppUserAsync(dbContext);
             if (userId == viewer.Id)
@@ -109,7 +109,7 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         var liveStream = await dbContext.LiveStreams.SingleOrDefaultAsync(s => s.AppUserId == userId);
         if (liveStream == null)
             return;
-        if (Context.User != null)
+        if (Context.User?.Identity?.IsAuthenticated == true)
         {
             var viewer = await Context.User.GetAppUserAsync(dbContext);
             if (userId == viewer.Id)

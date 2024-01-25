@@ -29,6 +29,24 @@ public class StreamController(AppDbContext dbContext, IAppObjectStorage objectSt
         });
     }
 
+    [HttpGet("{userId:guid}")]
+    public async Task<IActionResult> GetStreamByUserId(Guid userId)
+    {
+        var stream = await dbContext.LiveStreams.SingleOrDefaultAsync(s => s.AppUserId == userId);
+        if (stream == null)
+            return NotFound();
+        return Ok(new
+        {
+            stream.Id,
+            stream.ServerUrl,
+            stream.StreamKey,
+            stream.Name,
+            stream.ThumbnailContentType,
+            stream.ChatEnabled,
+            stream.ChatFollowersOnly
+        });
+    }
+
     [HttpGet("Thumbnail")]
     public async Task<IActionResult> GetThumbnail([FromQuery(Name = "user")] Guid userId)
     {
