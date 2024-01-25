@@ -23,7 +23,7 @@ export default function UserItem({item}: UserItemProps) {
           className={cn("flex items-center w-full hover:bg-secondary py-1.5", collapsed ? "px-2" : "px-3.5", isActive && "bg-accent")}>
       <UserAvatar
         src={getAvatarApiUrl(item.id)}
-        className={cn("flex-none w-fit", item.isLive && "ring-2 ring-offset-background ring-offset-2 ring-rose-500")}
+        className={cn("flex-none", item.isLive && "ring-2 ring-offset-background ring-offset-2 ring-rose-500")}
         isLive={item.isLive}
         alt={item.username}/>
       {!collapsed && (
