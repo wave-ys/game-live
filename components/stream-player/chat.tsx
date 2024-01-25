@@ -9,6 +9,8 @@ import {useEventHub} from "@/components/event-hub";
 import {UserProfileModel} from "@/api";
 import {format} from "date-fns";
 import {PlayerStreamModel} from "@/components/stream-player/info-editor";
+import {CgBlock, CgUnblock} from "react-icons/cg";
+import {toggleBlockAction} from "@/actions/block";
 
 interface StreamCharProps {
   className?: string;
@@ -43,7 +45,8 @@ interface ChatInputBoxProps {
 }
 
 interface StreamCommunityProps {
-  chatUsers: ChatUser[]
+  chatUsers: ChatUser[];
+  isSelf: boolean;
 }
 
 interface ChatMessage {
@@ -133,9 +136,30 @@ function ChatInputBox({className, onSubmit, loading, disabled}: ChatInputBoxProp
   )
 }
 
-export function StreamCommunity({chatUsers}: StreamCommunityProps) {
+export function StreamCommunity({chatUsers, isSelf}: StreamCommunityProps) {
+  const [search, setSearch] = useState("");
+
   return (
-    <>{chatUsers.length}</>
+    <div className={"p-2 flex flex-col space-y-2"}>
+      <Input className={"flex-none"} value={search} onChange={e => setSearch(e.target.value)}
+             placeholder={"Search..."}/>
+      <div className={cn("flex-auto space-y-2")}>
+        {chatUsers.map(chatUser => (
+          <div key={chatUser.id}
+               className={"flex items-center p-2 border border-background hover:border-inherit group rounded-lg"}>
+            <span
+              className={cn("flex-auto truncate text-sm", chatUser.blocked && "text-muted-foreground line-through")}>
+              {chatUser.username}
+            </span>
+            <div
+              className={cn("invisible group-hover:visible hover:text-foreground text-gray-500 rounded-full hover:cursor-pointer p-1", !isSelf && "group-hover:invisible")}
+              onClick={() => toggleBlockAction(chatUser.id, !chatUser.blocked)}>
+              {chatUser.blocked ? <CgUnblock className={"w-5 h-5"}/> : <CgBlock className={"w-5 h-5"}/>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -215,7 +239,7 @@ export default function StreamChat({className, userProfileModel, isSelf, stream,
         </>
       )}
       {streamVariant === "community" && (
-        <StreamCommunity chatUsers={chatUsers}/>
+        <StreamCommunity isSelf={isSelf} chatUsers={chatUsers}/>
       )}
     </div>
   )

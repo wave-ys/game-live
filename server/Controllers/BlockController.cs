@@ -1,15 +1,17 @@
 using GameLiveServer.Data;
+using GameLiveServer.Events;
 using GameLiveServer.Models;
 using GameLiveServer.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameLiveServer.Controllers;
 
 [ApiController]
 [Route("/Api/[controller]")]
-public class BlockController(AppDbContext dbContext) : ControllerBase
+public class BlockController(AppDbContext dbContext, IHubContext<EventHub> hubContext) : ControllerBase
 {
     [HttpGet("is-blocked-by/{other:guid}")]
     public async Task<IActionResult> CheckStatus(Guid other)
@@ -46,6 +48,7 @@ public class BlockController(AppDbContext dbContext) : ControllerBase
         {
             await dbContext.Blocks.Where(b => b.BlockerId == appUser.Id && b.BlockingId == otherUser.Id)
                 .ExecuteDeleteAsync();
+            await SendChatUsersEvent(appUser.Id);
             return Ok();
         }
 
@@ -59,6 +62,28 @@ public class BlockController(AppDbContext dbContext) : ControllerBase
         };
         dbContext.Blocks.Add(entity);
         await dbContext.SaveChangesAsync();
+        await SendChatUsersEvent(appUser.Id);
         return Ok();
+    }
+
+    private async Task SendChatUsersEvent(Guid userId)
+    {
+        var list = await dbContext.AppUsers
+            .Where(u => u.Id == userId)
+            .SelectMany(u => u.Viewers)
+            .Select(v => v.Viewer)
+            .Select(u => new
+            {
+                u.Id,
+                u.Username,
+                Blocked = u.Blockers.Any(b => b.BlockerId == userId)
+            })
+            .ToListAsync();
+
+        await hubContext.Clients.Group("StreamViewerUser." + userId).SendAsync("streamViewerUsers", new
+        {
+            UserId = userId,
+            Users = list
+        });
     }
 }
