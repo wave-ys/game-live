@@ -35,4 +35,17 @@ public class UserController(AppDbContext dbContext, IAppObjectStorage objectStor
             user.Username
         });
     }
+
+    [HttpGet("username/{username}")]
+    public async Task<IActionResult> GetUserByUsername(string username)
+    {
+        var user = await dbContext.AppUsers.SingleOrDefaultAsync(u => u.Username == username);
+        if (user == null)
+            return NotFound();
+        return Ok(new
+        {
+            user.Id,
+            user.Username
+        });
+    }
 }

@@ -15,7 +15,7 @@ export default function UserItem({item}: UserItemProps) {
   const collapsed = useHomeSidebar(state => state.collapsed);
   const pathname = usePathname();
 
-  const href = `/${item.id}`;
+  const href = `/${item.username}`;
   const isActive = pathname.startsWith(href);
 
   return (
