@@ -15,6 +15,7 @@ interface StreamCharProps {
   userProfileModel: UserProfileModel;
   stream: PlayerStreamModel;
   isSelf: boolean;
+  isFollower: boolean;
 }
 
 interface StreamChatToggleProps {
@@ -172,10 +173,15 @@ export default function StreamChat({className, userProfileModel, isSelf, stream}
         value: true,
         reason: "Chat is disabled"
       }
+    if (!isSelf && stream.chatFollowersOnly)
+      return {
+        value: true,
+        reason: "Chat is for followers only"
+      }
     return {
       value: false
     }
-  }, [isSelf, stream.chatEnabled]);
+  }, [isSelf, stream.chatEnabled, stream.chatFollowersOnly]);
 
   return (
     <div className={cn("flex flex-col", className)}>

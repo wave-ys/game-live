@@ -22,11 +22,18 @@ interface StreamPlayerProps {
   userProfileModel: UserProfileModel;
   streamModel: PlayerStreamModel;
   isSelf: boolean;
+  isFollower: boolean;
 }
 
 export type LiveStatus = 'loading' | 'on' | 'off';
 
-export default function StreamPlayer({className, userProfileModel, streamModel, isSelf}: StreamPlayerProps) {
+export default function StreamPlayer({
+                                       className,
+                                       userProfileModel,
+                                       streamModel,
+                                       isSelf,
+                                       isFollower
+                                     }: StreamPlayerProps) {
   const chatCollapsed = useStreamChat(state => state.collapsed);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('loading');
   const {connected, subscribeLiveStatus, unsubscribeLiveStatus} = useEventHub();
@@ -65,8 +72,9 @@ export default function StreamPlayer({className, userProfileModel, streamModel, 
               <StreamInfoEditor className={"m-4"} streamModel={streamModel} userProfileModel={userProfileModel}/>}
         </div>
       </div>
-      {!chatCollapsed && <StreamChat isSelf={isSelf} stream={streamModel} userProfileModel={userProfileModel}
-                                     className={"border-l col-span-1"}/>}
+      {!chatCollapsed &&
+          <StreamChat isFollower={isFollower} isSelf={isSelf} stream={streamModel} userProfileModel={userProfileModel}
+                      className={"border-l col-span-1"}/>}
       {chatCollapsed && <StreamChatToggle className={"absolute right-2 top-2"}/>}
     </div>
   )

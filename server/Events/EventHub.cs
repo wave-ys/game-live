@@ -193,6 +193,9 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         var liveStream = await dbContext.LiveStreams.SingleOrDefaultAsync(s => s.AppUserId == userId);
         if (liveStream == null || (!liveStream.ChatEnabled && userId != appUser.Id))
             return;
+        if (liveStream.ChatFollowersOnly &&
+            !await dbContext.Follows.AnyAsync(f => f.FollowerId == appUser.Id && f.FollowingId == userId))
+            return;
         await Clients.OthersInGroup("StreamChatUser." + userId).SendAsync("chat", new
         {
             Id = Guid.NewGuid(),
