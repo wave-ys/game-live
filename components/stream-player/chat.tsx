@@ -4,7 +4,7 @@ import {useStreamChat} from "@/store/use-stream-chat";
 import {RiExpandLeftLine, RiExpandRightLine} from "react-icons/ri";
 import {IoChatboxOutline, IoPeopleOutline} from "react-icons/io5";
 import {Input} from "@/components/ui/input";
-import {FormEventHandler, forwardRef, useEffect, useMemo, useRef, useState} from "react";
+import {FormEventHandler, forwardRef, useEffect, useMemo, useRef, useState, useTransition} from "react";
 import {useEventHub} from "@/components/event-hub";
 import {UserProfileModel} from "@/api";
 import {format} from "date-fns";
@@ -141,6 +141,14 @@ function ChatInputBox({className, onSubmit, loading, disabled}: ChatInputBoxProp
 export function StreamCommunity({chatUsers, isSelf}: StreamCommunityProps) {
   const [search, setSearch] = useState("");
 
+  const [isPending, startTransition] = useTransition()
+
+  const handleBlock = (userId: string, blocked: boolean) => {
+    startTransition(() => {
+      toggleBlockAction(userId, blocked).then();
+    })
+  }
+
   return (
     <div className={"p-2 flex flex-col space-y-2"}>
       <Input className={"flex-none"} value={search} onChange={e => setSearch(e.target.value)}
@@ -155,8 +163,8 @@ export function StreamCommunity({chatUsers, isSelf}: StreamCommunityProps) {
               {chatUser.username}
             </span>
               <div
-                className={cn("invisible group-hover:visible hover:text-foreground text-gray-500 rounded-full hover:cursor-pointer p-1", !isSelf && "group-hover:invisible")}
-                onClick={() => toggleBlockAction(chatUser.id, !chatUser.blocked)}>
+                className={cn("invisible group-hover:visible hover:text-foreground text-gray-500 rounded-full hover:cursor-pointer p-1", !isSelf && "group-hover:invisible", isPending && "hover:cursor-not-allowed hover:text-gray-500")}
+                onClick={() => handleBlock(chatUser.id, !chatUser.blocked)}>
                 {chatUser.blocked ? <CgUnblock className={"w-5 h-5"}/> : <CgBlock className={"w-5 h-5"}/>}
               </div>
             </div>
@@ -199,11 +207,13 @@ export default function StreamChat({
   }, [connected, subscribeChat, unsubscribeChat, userProfileModel.id]);
 
   useEffect(() => {
+    console.log("subscribe chat users", connected);
     if (!connected)
       return;
     const subscriber = (users: ChatUser[]) => setChatUsers(users);
     subscribeChatUsers(userProfileModel.id, subscriber).then();
     return () => {
+      console.log("unsubscribe chat users");
       unsubscribeChatUsers(userProfileModel.id, subscriber).then();
     }
   }, [connected, subscribeChat, subscribeChatUsers, unsubscribeChat, unsubscribeChatUsers, userProfileModel.id]);

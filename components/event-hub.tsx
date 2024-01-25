@@ -106,7 +106,6 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
     });
 
     connection.on('streamViewerUsers', (message: ChatUsersEventMessage) => {
-      console.log(message);
       chatUsersSubscribers.get(message.userId)?.forEach(subscriber => subscriber(message.users));
     });
 
@@ -199,7 +198,7 @@ export function EventHubProvider({children}: { children: React.ReactNode }) {
       return;
     subscribers.delete(subscriber);
     if (subscribers.size === 0) {
-      chatSubscribers.delete(userId);
+      chatUsersSubscribers.delete(userId);
       await hubConnection?.invoke("unsubscribeChatUsers", userId);
     }
   }
