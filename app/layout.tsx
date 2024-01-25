@@ -5,6 +5,7 @@ import React from "react";
 import './globals.css'
 import {EventHubProvider} from "@/components/event-hub";
 import {Toaster} from "sonner";
+import {TooltipProvider} from "@/components/ui/tooltip";
 
 const inter = Inter({subsets: ['latin']})
 
@@ -20,7 +21,9 @@ export default function RootLayout({children}: { children: React.ReactNode }) {
     <body className={inter.className}>
     <EventHubProvider>
       <Toaster/>
-      {children}
+      <TooltipProvider>
+        {children}
+      </TooltipProvider>
     </EventHubProvider>
     </body>
     </html>

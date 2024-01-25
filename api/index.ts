@@ -14,6 +14,12 @@ export interface UserProfileModel {
   email: string;
 }
 
+export interface SidebarItemModel {
+  id: string;
+  username: string;
+  isLive: boolean;
+}
+
 export interface StreamModel {
   id: string;
 
