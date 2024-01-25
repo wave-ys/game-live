@@ -187,7 +187,7 @@ export default function StreamChat({className, userProfileModel, isSelf, stream,
     return {
       value: false
     }
-  }, [isSelf, stream.chatEnabled, stream.chatFollowersOnly]);
+  }, [hasAuthenticated, isSelf, stream.chatEnabled, stream.chatFollowersOnly]);
 
   return (
     <div className={cn("flex flex-col", className)}>

@@ -78,15 +78,16 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         if (Context.User?.Identity?.IsAuthenticated == true)
         {
             var viewer = await Context.User.GetAppUserAsync(dbContext);
-            if (userId == viewer.Id)
-                return;
-            dbContext.BroadcasterViewers.Add(new BroadcasterViewer
+            if (userId != viewer.Id)
             {
-                BroadcasterId = userId,
-                ViewerId = viewer.Id,
-                ConnectionId = Context.ConnectionId
-            });
-            await dbContext.SaveChangesAsync();
+                dbContext.BroadcasterViewers.Add(new BroadcasterViewer
+                {
+                    BroadcasterId = userId,
+                    ViewerId = viewer.Id,
+                    ConnectionId = Context.ConnectionId
+                });
+                await dbContext.SaveChangesAsync();
+            }
         }
 
         var list = await dbContext.AppUsers
@@ -96,12 +97,17 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
             .Select(u => new
             {
                 u.Id,
-                u.Username
+                u.Username,
+                Blocked = u.Blockers.Any(b => b.BlockerId == userId)
             })
             .ToListAsync();
 
         await Groups.AddToGroupAsync(Context.ConnectionId, "StreamViewerUser." + userId);
-        await Clients.Group("StreamViewerUser." + userId).SendAsync("streamViewerUsers", list);
+        await Clients.Group("StreamViewerUser." + userId).SendAsync("streamViewerUsers", new
+        {
+            UserId = userId,
+            Users = list
+        });
     }
 
     public async Task UnsubscribeChatUsers(Guid userId)
@@ -112,11 +118,10 @@ public class EventHub(ICacheService cacheService, AppDbContext dbContext) : Hub
         if (Context.User?.Identity?.IsAuthenticated == true)
         {
             var viewer = await Context.User.GetAppUserAsync(dbContext);
-            if (userId == viewer.Id)
-                return;
-            await dbContext.BroadcasterViewers.Where(v =>
-                    v.ViewerId == viewer.Id && v.BroadcasterId == userId && v.ConnectionId == Context.ConnectionId)
-                .ExecuteDeleteAsync();
+            if (userId != viewer.Id)
+                await dbContext.BroadcasterViewers.Where(v =>
+                        v.ViewerId == viewer.Id && v.BroadcasterId == userId && v.ConnectionId == Context.ConnectionId)
+                    .ExecuteDeleteAsync();
         }
 
         var list = await dbContext.AppUsers
